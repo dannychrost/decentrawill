@@ -1,7 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Home from './pages/Home';
-import Whatever from './pages/Whatever';
+import Whatever from './pages/Faq';
 
 function App() {
   return (
@@ -11,8 +11,8 @@ function App() {
           <Link to='/'>
             <button>Home</button>
           </Link>
-          <Link to='/Whatever'>
-            <button>Home2</button>
+          <Link to='/Faq'>
+            <button>FAQ</button>
           </Link>
         </header>
         <Routes>
