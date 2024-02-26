@@ -6,27 +6,25 @@ import Home2 from "./pages/Home2";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-          <Link to="/">
-            <button class="home-btn">Home</button>
-          </Link>
-          <Link to="/Faq">
-            <button class="faq-btn">FAQ</button>
-          </Link>
-          <Link to="/App">
-            <button class="enter-app-btn">Enter Application</button>
-          </Link>
-        </header>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/Faq" element={<Faq />} />
-          <Route path="/Home2" element={<Home2 />} />
-        </Routes>
-        <footer className="App-footer"></footer>
-      </div>
-    </Router>
+    <div className="App">
+      <header className="App-header">
+        <Link to="/">
+          <button class="home-btn">Home</button>
+        </Link>
+        <Link to="/Faq">
+          <button class="faq-btn">FAQ</button>
+        </Link>
+        <Link to="/App">
+          <button class="enter-app-btn">Enter Application</button>
+        </Link>
+      </header>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/Faq" element={<Faq />} />
+        <Route path="/Home2" element={<Home2 />} />
+      </Routes>
+      <footer className="App-footer"></footer>
+    </div>
   );
 }
 
