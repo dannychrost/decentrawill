@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/Whatever.css';
 
-function Whatever() {
+function Faq() {
   return (
     <div className='def'>
       <h1>second page</h1>
@@ -9,4 +9,4 @@ function Whatever() {
   );
 }
 
-export default Whatever;
+export default Faq;
