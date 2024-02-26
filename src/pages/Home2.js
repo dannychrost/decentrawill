@@ -1,7 +1,7 @@
 import React from 'react';
-import '../styles/Home.css';
+import '../styles/Home2.css';
 
-function Home() {
+function Home2() {
   return (
     <div className='abc'>
       <h1>homepage</h1>
@@ -9,4 +9,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Home2;
