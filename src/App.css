@@ -18,3 +18,23 @@
 
 .App-footer {
 }
+
+.home-btn,
+.faq-btn,
+.enter-app-btn {
+  height: 4rem;
+  padding: 0 1.6rem;
+  background-color: purple;
+  border-radius: 8px;
+  border-style: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.home-btn:hover,
+.faq-btn:hover,
+.enter-app-btn:hover {
+  background-color: rgb(187, 89, 187);
+  transition: 0.15s;
+}

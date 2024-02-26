@@ -1,7 +1,8 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Home from './pages/Home';
-import Whatever from './pages/Faq';
+import Faq from './pages/Faq';
+import Home2 from './pages/Home2';
 
 function App() {
   return (
@@ -9,15 +10,19 @@ function App() {
       <div className='App'>
         <header className='App-header'>
           <Link to='/'>
-            <button>Home</button>
+            <button class='home-btn'>Home</button>
           </Link>
           <Link to='/Faq'>
-            <button>FAQ</button>
+            <button class='faq-btn'>FAQ</button>
+          </Link>
+          <Link to='/Home2'>
+            <button class='enter-app-btn'>Enter Application</button>
           </Link>
         </header>
         <Routes>
           <Route path='/' element={<Home />} />
-          <Route path='/Whatever' element={<Whatever />} />
+          <Route path='/Faq' element={<Faq />} />
+          <Route path='/Home2' element={<Home2 />} />
         </Routes>
         <footer className='App-footer'></footer>
       </div>
