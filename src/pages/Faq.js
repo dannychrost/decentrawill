@@ -1,10 +1,9 @@
-import React from 'react';
-import '../styles/Whatever.css';
+import React from "react";
 
 function Faq() {
   return (
-    <div className='def'>
-      <h1>second page</h1>
+    <div className="def">
+      <h1>faq page</h1>
     </div>
   );
 }

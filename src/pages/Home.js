@@ -1,10 +1,9 @@
-import React from 'react';
-import '../styles/Home.css';
+import React from "react";
 
 function Home() {
   return (
-    <div className='abc'>
-      <h1>homepage</h1>
+    <div className="abc">
+      <h1>homepage1</h1>
     </div>
   );
 }
