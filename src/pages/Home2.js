@@ -1,6 +1,6 @@
 // Home2.js
 import { useEffect, useContext } from "react";
-import { NavbarContext } from "../NavbarContext";
+import { NavbarContext } from "../contexts/NavbarContext";
 
 const Home2 = () => {
   const { setHeaderValue } = useContext(NavbarContext);
