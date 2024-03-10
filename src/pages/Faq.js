@@ -1,6 +1,6 @@
 // Faq.js
 import { useEffect, useContext } from "react";
-import { NavbarContext } from "../NavbarContext";
+import { NavbarContext } from "../contexts/NavbarContext";
 
 const Faq = () => {
   const { setHeaderValue } = useContext(NavbarContext);

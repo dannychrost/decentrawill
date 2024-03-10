@@ -4,29 +4,32 @@ import Faq from "./pages/Faq";
 import Home2 from "./pages/Home2";
 import { Button } from "react-bootstrap";
 import { MainNavbar, AppNavbar, FooterNavbar } from "./components/Navbar";
-import { NavbarProvider, NavbarContext } from "./NavbarContext";
+import { NavbarProvider, NavbarContext } from "./contexts/NavbarContext";
+import { WalletProvider } from "./contexts/WalletContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (
     <Router>
-      <NavbarProvider>
-        <div className="App">
-          <NavbarContext.Consumer>
-            {({ headerValue }) =>
-              headerValue === 0 ? <MainNavbar /> : <AppNavbar />
-            }
-          </NavbarContext.Consumer>
+      <WalletProvider>
+        <NavbarProvider>
+          <div className="App">
+            <NavbarContext.Consumer>
+              {({ headerValue }) =>
+                headerValue === 0 ? <MainNavbar /> : <AppNavbar />
+              }
+            </NavbarContext.Consumer>
 
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/Faq" element={<Faq />} />
-            <Route path="/Home2" element={<Home2 />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/Faq" element={<Faq />} />
+              <Route path="/Home2" element={<Home2 />} />
+            </Routes>
 
-          <FooterNavbar></FooterNavbar>
-        </div>
-      </NavbarProvider>
+            <FooterNavbar></FooterNavbar>
+          </div>
+        </NavbarProvider>
+      </WalletProvider>
     </Router>
   );
 }
