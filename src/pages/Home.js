@@ -1,11 +1,15 @@
-import React from "react";
+// Home.js
+import { useEffect, useContext } from "react";
+import { NavbarContext } from "../NavbarContext";
 
-function Home() {
-  return (
-    <div className="abc">
-      <h1>homepage1</h1>
-    </div>
-  );
-}
+const Home = () => {
+  const { setHeaderValue } = useContext(NavbarContext);
+
+  useEffect(() => {
+    setHeaderValue(0);
+  }, [setHeaderValue]);
+
+  return <div>Homepage 1</div>;
+};
 
 export default Home;

@@ -1,11 +1,15 @@
-import React from "react";
+// Faq.js
+import { useEffect, useContext } from "react";
+import { NavbarContext } from "../NavbarContext";
 
-function Faq() {
-  return (
-    <div className="def">
-      <h1>faq page</h1>
-    </div>
-  );
-}
+const Faq = () => {
+  const { setHeaderValue } = useContext(NavbarContext);
+
+  useEffect(() => {
+    setHeaderValue(0);
+  }, [setHeaderValue]);
+
+  return <div>Faq page</div>;
+};
 
 export default Faq;
