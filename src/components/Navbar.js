@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import Container from "react-bootstrap/Container";
+
 import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
+
 import NavDropdown from "react-bootstrap/NavDropdown";
-import Button from "react-bootstrap/Button";
+import { Navbar, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { WalletContext } from "../contexts/WalletContext";
 import { useContext } from "react";
 function MainNavbar() {
@@ -23,7 +23,7 @@ function MainNavbar() {
               <Nav.Link as={Link} to="/faq">
                 FAQ
               </Nav.Link>
-              <Nav.Link as={Link} to="/home2">
+              <Nav.Link as={Link} to="/app">
                 Enter Application
               </Nav.Link>
             </Nav>
@@ -55,32 +55,58 @@ function AppNavbar() {
 }
 function FooterNavbar() {
   return (
-    <footer>
-      <Navbar fixed="bottom" expand="lg" className="bg-body-tertiary">
-        <Container>
-          <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="#home">Home</Nav.Link>
-              <Nav.Link href="#link">Link</Nav.Link>
-              <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.2">
-                  Another action
-                </NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.3">
-                  Something
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action/3.4">
-                  Separated link
-                </NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+    <footer className="mt-5">
+      {" "}
+      {/* Add some margin top */}
+      <Container>
+        <Row className="py-4">
+          {" "}
+          {/* Add some padding */}
+          {/* Subscribe Section */}
+          <Col md={{ span: 4, offset: 0 }}>
+            {" "}
+            {/* Medium devices and up take half width, add margin bottom */}
+            <h5>Sign up for updates</h5>
+            <Form>
+              <Form.Group controlId="formBasicEmail">
+                <Form.Control type="email" placeholder="Enter email" />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Subscribe
+              </Button>
+            </Form>
+          </Col>
+          {/* Contact Us Section */}
+          <Col md={{ span: 4, offset: 2 }}>
+            {" "}
+            {/* Medium devices and up take half width, add margin bottom */}
+            <h5>Contact us</h5>
+            <p>
+              123 Main Street
+              <br />
+              City, State ZIP
+              <br />
+              Phone: 123-456-7890
+              <br />
+              Email: info@example.com
+            </p>
+          </Col>
+          <Col md={{ span: 2, offset: 0 }}>
+            {" "}
+            {/* Medium devices and up take half width, add margin bottom */}
+            <h5>Contact us</h5>
+            <p>
+              123 Main Street
+              <br />
+              City, State ZIP
+              <br />
+              Phone: 123-456-7890
+              <br />
+              Email: info@example.com
+            </p>
+          </Col>
+        </Row>
+      </Container>
     </footer>
   );
 }

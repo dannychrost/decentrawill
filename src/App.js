@@ -19,13 +19,22 @@ function App() {
                 headerValue === 0 ? <MainNavbar /> : <AppNavbar />
               }
             </NavbarContext.Consumer>
+            <div
+              style={{
+                background: "linear-gradient(315deg, #e056fd 0%, #000000 74%)",
+                color: "white",
+                padding: "10vw",
 
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/Faq" element={<Faq />} />
-              <Route path="/Home2" element={<Home2 />} />
-            </Routes>
-
+                height: "100vh",
+                overflow: "hidden",
+              }}
+            >
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/app" element={<Home2 />} />
+              </Routes>
+            </div>
             <FooterNavbar></FooterNavbar>
           </div>
         </NavbarProvider>
