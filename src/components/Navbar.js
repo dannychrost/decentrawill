@@ -1,29 +1,34 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
-import Nav from "react-bootstrap/Nav";
+import Nav from 'react-bootstrap/Nav';
 
-import NavDropdown from "react-bootstrap/NavDropdown";
-import { Navbar, Container, Row, Col, Form, Button } from "react-bootstrap";
-import { WalletContext } from "../contexts/WalletContext";
-import { useContext } from "react";
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import { Navbar, Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { WalletContext } from '../contexts/WalletContext';
+import { useContext } from 'react';
 function MainNavbar() {
   return (
     <header>
-      <Navbar expand="lg" className="bg-body-tertiary">
+      <Navbar
+        expand='lg'
+        className='bg-body-tertiary'
+        variant='light'
+        style={{ background: 'purple' }}
+      >
         <Container>
-          <Navbar.Brand as={Link} to="/">
+          <Navbar.Brand as={Link} to='/'>
             DecentraWill
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link as={Link} to="/">
+          <Navbar.Toggle aria-controls='basic-navbar-nav' />
+          <Navbar.Collapse id='basic-navbar-nav'>
+            <Nav className='me-auto'>
+              <Nav.Link as={Link} to='/'>
                 Home
               </Nav.Link>
-              <Nav.Link as={Link} to="/faq">
+              <Nav.Link as={Link} to='/faq'>
                 FAQ
               </Nav.Link>
-              <Nav.Link as={Link} to="/app">
+              <Nav.Link as={Link} to='/app'>
                 Enter Application
               </Nav.Link>
             </Nav>
@@ -38,15 +43,17 @@ function AppNavbar() {
     useContext(WalletContext);
   return (
     <header>
-      <Navbar expand="lg" className="bg-body-tertiary">
+      <Navbar expand='lg' className='bg-dark text-white py-4'>
         <Container>
-          <Navbar.Brand href="#">DecentraWill</Navbar.Brand>
-          <Button variant="outline-primary" onClick={handleWalletAction}>
+          <Navbar.Brand href='#' className='text-primary'>
+            DecentraWill
+          </Navbar.Brand>
+          <Button variant='primary' onClick={handleWalletAction}>
             {isConnected
               ? `${userAccount.substring(0, 6)}...${userAccount.substring(
                   userAccount.length - 4
                 )}`
-              : "Connect Wallet"}
+              : 'Connect Wallet'}
           </Button>
         </Container>
       </Navbar>
@@ -55,30 +62,30 @@ function AppNavbar() {
 }
 function FooterNavbar() {
   return (
-    <footer className="mt-5">
-      {" "}
+    <footer className='bg-dark text-white py-4'>
+      {' '}
       {/* Add some margin top */}
       <Container>
-        <Row className="py-4">
-          {" "}
+        <Row className='py-4'>
+          {' '}
           {/* Add some padding */}
           {/* Subscribe Section */}
           <Col md={{ span: 4, offset: 0 }}>
-            {" "}
+            {' '}
             {/* Medium devices and up take half width, add margin bottom */}
             <h5>Sign up for updates</h5>
             <Form>
-              <Form.Group controlId="formBasicEmail">
-                <Form.Control type="email" placeholder="Enter email" />
+              <Form.Group controlId='formBasicEmail'>
+                <Form.Control type='email' placeholder='Enter email' />
               </Form.Group>
-              <Button variant="primary" type="submit">
+              <Button variant='primary' type='submit'>
                 Subscribe
               </Button>
             </Form>
           </Col>
           {/* Contact Us Section */}
           <Col md={{ span: 4, offset: 2 }}>
-            {" "}
+            {' '}
             {/* Medium devices and up take half width, add margin bottom */}
             <h5>Contact us</h5>
             <p>
@@ -92,17 +99,55 @@ function FooterNavbar() {
             </p>
           </Col>
           <Col md={{ span: 2, offset: 0 }}>
-            {" "}
+            {' '}
             {/* Medium devices and up take half width, add margin bottom */}
-            <h5>Contact us</h5>
+            <h5>Links</h5>
             <p>
-              123 Main Street
+              <a
+                href='https://www.linkedin.com/'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <img
+                  src='https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png'
+                  alt='LinkedIn Logo'
+                  style={{ width: '30px', height: '30px' }}
+                />
+              </a>
               <br />
-              City, State ZIP
+              <a
+                href='https://www.linkedin.com/'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <a
+                  href='https://www.instagram.com/'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <img
+                    src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/768px-Instagram_icon.png'
+                    alt='Instagram Logo'
+                    style={{
+                      width: '30px',
+                      height: '30px',
+                      marginRight: '10px',
+                    }}
+                  />
+                </a>
+              </a>
               <br />
-              Phone: 123-456-7890
-              <br />
-              Email: info@example.com
+              <a
+                href='mailto:youremail@gmail.com'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <img
+                  src='https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg'
+                  alt='Gmail Logo'
+                  style={{ width: '30px', height: '30px' }}
+                />
+              </a>
             </p>
           </Col>
         </Row>
