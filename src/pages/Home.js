@@ -34,7 +34,9 @@ const Home = () => {
         <Container style={{ marginBottom: '150px' }}>
           <Row>
             <Col sm={6} style={{ marginBottom: '20px' }}>
-              <Button variant='primary'>Create Will</Button>{' '}
+              <Button href='/signIn' variant='primary'>
+                Create Will
+              </Button>{' '}
             </Col>
             <Col sm={-1}>
               <Button variant='outline-primary'>Buy Tokens</Button>{' '}
