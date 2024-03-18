@@ -28,8 +28,11 @@ function MainNavbar() {
               <Nav.Link as={Link} to='/faq'>
                 FAQ
               </Nav.Link>
-              <Nav.Link as={Link} to='/app'>
+              <Nav.Link as={Link} to='/createAccount'>
                 Enter Application
+              </Nav.Link>
+              <Nav.Link as={Link} to='/signIn'>
+                Sign In
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>

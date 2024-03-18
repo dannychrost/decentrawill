@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import Faq from './pages/Faq';
-import Home2 from './pages/Home2';
+import SignIn from './pages/SignIn';
+import CreateAccount from './pages/CreateAccount';
 import { Button } from 'react-bootstrap';
 import { MainNavbar, AppNavbar, FooterNavbar } from './components/Navbar';
 import { NavbarProvider, NavbarContext } from './contexts/NavbarContext';
@@ -31,7 +32,8 @@ function App() {
               <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/faq' element={<Faq />} />
-                <Route path='/app' element={<Home2 />} />
+                <Route path='/createAccount' element={<CreateAccount />} />
+                <Route path='/signIn' element={<SignIn />} />
               </Routes>
             </div>
             <FooterNavbar></FooterNavbar>
