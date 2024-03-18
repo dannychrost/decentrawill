@@ -26,7 +26,7 @@ const CreateAccount = () => {
 
   const validatePassword = () => {
     const isValidPassword = password.length >= 8; // Check if password length is at least 8 characters
-
+    // More password requirements
     if (!isValidPassword) {
       setPasswordError('Password must be at least 8 characters long');
     } else {
@@ -54,7 +54,7 @@ const CreateAccount = () => {
         </Form.Group>
       </Row>
       <Row className='mb-3'>
-        <Form.Group className='mb-3' controlId='formBasicPassword'>
+        <Form.Group as={Col} controlId='formGridPassword'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type='password'
@@ -62,21 +62,16 @@ const CreateAccount = () => {
             value={password}
             onChange={handlePasswordChange}
             onBlur={validatePassword} // Validate on blur
-            isInvalid={!!passwordError} // Set isInvalid to true if passwordError is not empty
+            isInvalid={!!passwordError} // Here, if passwordError is a non-empty string, it will make the form control invalid
           />
           <Form.Control.Feedback type='invalid'>
             {passwordError}
           </Form.Control.Feedback>
-          {password.length > 0 && password.length < 8 && (
-            <Form.Text className='text-danger'>
-              Password must be at least 8 characters long
-            </Form.Text>
-          )}
         </Form.Group>
       </Row>
 
-      <Button variant='primary' type='submit' disabled={isSubmitDisabled}>
-        Submit
+      <Button variant='primary' type='submit'>
+        Create Account
       </Button>
 
       <Nav>
