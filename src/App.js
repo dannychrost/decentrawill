@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Home from './pages/Home';
+import AppHome from './pages/AppHome';
 import Faq from './pages/Faq';
 import SignIn from './pages/SignIn';
 import CreateAccount from './pages/CreateAccount';
@@ -34,6 +35,7 @@ function App() {
                 <Route path='/faq' element={<Faq />} />
                 <Route path='/createAccount' element={<CreateAccount />} />
                 <Route path='/signIn' element={<SignIn />} />
+                <Route path='/appHome' element={<AppHome />} />
               </Routes>
             </div>
             <FooterNavbar></FooterNavbar>

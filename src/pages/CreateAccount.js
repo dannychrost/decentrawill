@@ -17,32 +17,6 @@ const CreateAccount = () => {
     setHeaderValue(0);
   }, [setHeaderValue]);
 
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const validateEmail = () => {
-    const isValid = /\S+@\S+\.\S+/.test(email); // Basic email format check
-    const endsWithCom = /\.com$/.test(email);
-    const endsWithEdu = /\.edu$/.test(email); // this validation didnt work
-    if (!isValid && endsWithCom) {
-      setEmailError('Please enter a valid email address');
-    } else {
-      setEmailError('');
-    }
-    return isValid;
-  };
-
-  const handleSubmitEmail = (event) => {
-    event.preventDefault();
-    if (validateEmail()) {
-      console.log('Form submitted with email:', email);
-    }
-  };
-
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -62,12 +36,15 @@ const CreateAccount = () => {
     return isValidPassword;
   };
 
-  const handleSubmitPass = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     if (validatePassword()) {
       console.log('Form submitted with password:', password);
     }
   };
+
+  const isSubmitDisabled = password.length < 8;
+
   return (
     <Form>
       <Row className='mb-3'>
@@ -77,7 +54,7 @@ const CreateAccount = () => {
         </Form.Group>
       </Row>
       <Row className='mb-3'>
-        <Form.Group as={Col} controlId='formGridPassword'>
+        <Form.Group className='mb-3' controlId='formBasicPassword'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type='password'
@@ -85,13 +62,21 @@ const CreateAccount = () => {
             value={password}
             onChange={handlePasswordChange}
             onBlur={validatePassword} // Validate on blur
-            isInvalid={!!passwordError}
+            isInvalid={!!passwordError} // Set isInvalid to true if passwordError is not empty
           />
+          <Form.Control.Feedback type='invalid'>
+            {passwordError}
+          </Form.Control.Feedback>
+          {password.length > 0 && password.length < 8 && (
+            <Form.Text className='text-danger'>
+              Password must be at least 8 characters long
+            </Form.Text>
+          )}
         </Form.Group>
       </Row>
 
-      <Button variant='primary' type='submit'>
-        Create Account
+      <Button variant='primary' type='submit' disabled={isSubmitDisabled}>
+        Submit
       </Button>
 
       <Nav>
