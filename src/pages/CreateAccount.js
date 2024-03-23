@@ -9,6 +9,11 @@ import Row from 'react-bootstrap/Row';
 import React from 'react';
 import { Nav } from 'react-bootstrap';
 import SignIn from './/SignIn';
+import '../firebase/Firebase';
+import 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+// import { initializeApp } from 'firebase/app';
+// import { getAuth } from 'firebase/auth';
 
 const CreateAccount = () => {
   const { setHeaderValue } = useContext(NavbarContext);
@@ -22,6 +27,36 @@ const CreateAccount = () => {
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
+  };
+
+  // const handleSubmitFireBase = async (event) => {
+  //   event.preventDefault();
+  //   try {
+  //     const email = event.target.elements.email.value;
+  //     const password = event.target.elements.password.value;
+  //     // Sign up the user with email and password
+  //     //await firebase.auth().createUserWithEmailAndPassword(email, password);
+  //     console.log('User signed up successfully');
+  //   } catch (error) {
+  //     console.error('Error signing up:', error.message);
+  //   }
+  // };
+
+  const handleSubmitFireBase = (event) => {
+    const auth = getAuth();
+    const email = event.target.elements.email.value;
+    const password = event.target.elements.password.value;
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
   };
 
   const validatePassword = () => {
@@ -46,7 +81,7 @@ const CreateAccount = () => {
   const isSubmitDisabled = password.length < 8;
 
   return (
-    <Form>
+    <Form onSubmit={handleSubmitFireBase}>
       <Row className='mb-3'>
         <Form.Group as={Col} controlId='formGridEmail'>
           <Form.Label>Email</Form.Label>
