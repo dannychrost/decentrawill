@@ -5,53 +5,65 @@ import {
   Routes,
   Link,
   Navigate,
-} from 'react-router-dom';
-import { useEffect, useContext, useState } from 'react';
-import { NavbarContext } from '../contexts/NavbarContext';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
+} from "react-router-dom";
+import { useEffect, useContext, useState } from "react";
+import { NavbarContext } from "../contexts/NavbarContext";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
-import { Nav } from 'react-bootstrap';
-import React from 'react';
-
+import { Nav } from "react-bootstrap";
+import React from "react";
+import "./SignIn.css";
 import {
   doSignInWithEmailAndPassword,
   doSignInWithGoogle,
-} from '../firebase/Auth';
-import { useAuth } from '../contexts/AuthContext';
+  doPasswordReset,
+  doConfirmPasswordReset,
+} from "../firebase/Auth";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function SignIn() {
   const { userLoggedIn } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!isSigningIn) {
-      setIsSigningIn(true);
-      await doSignInWithEmailAndPassword(email, password);
-      // doSendEmailVerification()
-    }
+
+    await doSignInWithEmailAndPassword(email, password).catch((error) => {
+      alert("Invalid credentials!");
+      setErrorMessage(error.message);
+    });
+    //doSendEmailVerification()
   };
 
   const onGoogleSignIn = (e) => {
     e.preventDefault();
-    if (!isSigningIn) {
-      setIsSigningIn(true);
-      doSignInWithGoogle().catch((err) => {
-        setIsSigningIn(false);
-      });
+
+    doSignInWithGoogle().catch((err) => {});
+  };
+  const handlePasswordReset = (e) => {
+    e.preventDefault();
+    if (email) {
+      // Ensure there's an email to send reset instructions to
+      doPasswordReset(email)
+        .then(() => {
+          alert("Password reset email sent. Please check your inbox.");
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+        });
     }
   };
 
   return (
     <div>
-      {userLoggedIn && <Navigate to={'/appHome'} replace={true} />}
+      {userLoggedIn && <Navigate to={"/appHome"} replace={true} />}
 
       <div>
         <div>
@@ -64,8 +76,8 @@ export default function SignIn() {
             <div>
               <label>Email</label>
               <input
-                type='email'
-                autoComplete='email'
+                type="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => {
@@ -77,8 +89,8 @@ export default function SignIn() {
             <div>
               <label>Password</label>
               <input
-                type='password'
-                autoComplete='current-password'
+                type="password"
+                autoComplete="current-password"
                 required
                 value={password}
                 onChange={(e) => {
@@ -89,56 +101,56 @@ export default function SignIn() {
 
             {errorMessage && <span>{errorMessage}</span>}
 
-            <button type='submit' disabled={isSigningIn}>
-              {isSigningIn ? 'Signing In...' : 'Sign In'}
+            <button type="submit">Sign In</button>
+            <button onClick={handlePasswordReset} disabled={!email}>
+              Forgot Password?
             </button>
           </form>
           <p>
-            Don't have an account? <Link to={'/createAccount'}>Sign up</Link>
+            Don't have an account? <Link to={"/createAccount"}>Sign up</Link>
           </p>
 
           <button
-            disabled={isSigningIn}
             onClick={(e) => {
               onGoogleSignIn(e);
             }}
-            className={`w-full flex items-center justify-center gap-x-3 py-2.5 border rounded-lg text-sm font-medium  ${
-              isSigningIn
-                ? 'cursor-not-allowed'
-                : 'hover:bg-gray-100 transition duration-300 active:bg-gray-100'
-            }`}
+            className="gsi-material-button"
           >
-            <svg
-              className='w-5 h-5'
-              viewBox='0 0 48 48'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <g clipPath='url(#clip0_17_40)'>
-                <path
-                  d='M47.532 24.5528C47.532 22.9214 47.3997 21.2811 47.1175 19.6761H24.48V28.9181H37.4434C36.9055 31.8988 35.177 34.5356 32.6461 36.2111V42.2078H40.3801C44.9217 38.0278 47.532 31.8547 47.532 24.5528Z'
-                  fill='#4285F4'
-                />
-                <path
-                  d='M24.48 48.0016C30.9529 48.0016 36.4116 45.8764 40.3888 42.2078L32.6549 36.2111C30.5031 37.675 27.7252 38.5039 24.4888 38.5039C18.2275 38.5039 12.9187 34.2798 11.0139 28.6006H3.03296V34.7825C7.10718 42.8868 15.4056 48.0016 24.48 48.0016Z'
-                  fill='#34A853'
-                />
-                <path
-                  d='M11.0051 28.6006C9.99973 25.6199 9.99973 22.3922 11.0051 19.4115V13.2296H3.03298C-0.371021 20.0112 -0.371021 28.0009 3.03298 34.7825L11.0051 28.6006Z'
-                  fill='#FBBC04'
-                />
-                <path
-                  d='M24.48 9.49932C27.9016 9.44641 31.2086 10.7339 33.6866 13.0973L40.5387 6.24523C36.2 2.17101 30.4414 -0.068932 24.48 0.00161733C15.4055 0.00161733 7.10718 5.11644 3.03296 13.2296L11.005 19.4115C12.901 13.7235 18.2187 9.49932 24.48 9.49932Z'
-                  fill='#EA4335'
-                />
-              </g>
-              <defs>
-                <clipPath id='clip0_17_40'>
-                  <rect width='48' height='48' fill='white' />
-                </clipPath>
-              </defs>
-            </svg>
-            {isSigningIn ? 'Signing In...' : 'Continue with Google'}
+            <div className="gsi-material-button-state"></div>
+            <div className="gsi-material-button-content-wrapper">
+              <div className="gsi-material-button-icon">
+                <svg
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 48 48"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  style={{ display: "block" }}
+                >
+                  <path
+                    fill="#EA4335"
+                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                  ></path>
+                  <path
+                    fill="#4285F4"
+                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                  ></path>
+                  <path
+                    fill="#FBBC05"
+                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                  ></path>
+                  <path
+                    fill="#34A853"
+                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                  ></path>
+                  <path fill="none" d="M0 0h48v48H0z"></path>
+                </svg>
+              </div>
+              <span className="gsi-material-button-contents">
+                Sign in with Google
+              </span>
+              <span style={{ display: "none" }}>Sign in with Google</span>
+            </div>
+            Continue with Google
           </button>
         </div>
       </div>
