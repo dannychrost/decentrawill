@@ -9,6 +9,11 @@ import Row from 'react-bootstrap/Row';
 import React from 'react';
 import { Nav } from 'react-bootstrap';
 import SignIn from './/SignIn';
+import '../firebase/Firebase';
+import 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+// import { initializeApp } from 'firebase/app';
+// import { getAuth } from 'firebase/auth';
 
 const CreateAccount = () => {
   const { setHeaderValue } = useContext(NavbarContext);
@@ -17,32 +22,6 @@ const CreateAccount = () => {
     setHeaderValue(0);
   }, [setHeaderValue]);
 
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const validateEmail = () => {
-    const isValid = /\S+@\S+\.\S+/.test(email); // Basic email format check
-    const endsWithCom = /\.com$/.test(email);
-    const endsWithEdu = /\.edu$/.test(email); // this validation didnt work
-    if (!isValid && endsWithCom) {
-      setEmailError('Please enter a valid email address');
-    } else {
-      setEmailError('');
-    }
-    return isValid;
-  };
-
-  const handleSubmitEmail = (event) => {
-    event.preventDefault();
-    if (validateEmail()) {
-      console.log('Form submitted with email:', email);
-    }
-  };
-
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -50,9 +29,39 @@ const CreateAccount = () => {
     setPassword(event.target.value);
   };
 
+  // const handleSubmitFireBase = async (event) => {
+  //   event.preventDefault();
+  //   try {
+  //     const email = event.target.elements.email.value;
+  //     const password = event.target.elements.password.value;
+  //     // Sign up the user with email and password
+  //     //await firebase.auth().createUserWithEmailAndPassword(email, password);
+  //     console.log('User signed up successfully');
+  //   } catch (error) {
+  //     console.error('Error signing up:', error.message);
+  //   }
+  // };
+
+  const handleSubmitFireBase = (event) => {
+    const auth = getAuth();
+    const email = event.target.elements.email.value;
+    const password = event.target.elements.password.value;
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
+  };
+
   const validatePassword = () => {
     const isValidPassword = password.length >= 8; // Check if password length is at least 8 characters
-
+    // More password requirements
     if (!isValidPassword) {
       setPasswordError('Password must be at least 8 characters long');
     } else {
@@ -62,14 +71,17 @@ const CreateAccount = () => {
     return isValidPassword;
   };
 
-  const handleSubmitPass = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     if (validatePassword()) {
       console.log('Form submitted with password:', password);
     }
   };
+
+  const isSubmitDisabled = password.length < 8;
+
   return (
-    <Form>
+    <Form onSubmit={handleSubmitFireBase}>
       <Row className='mb-3'>
         <Form.Group as={Col} controlId='formGridEmail'>
           <Form.Label>Email</Form.Label>
@@ -85,8 +97,11 @@ const CreateAccount = () => {
             value={password}
             onChange={handlePasswordChange}
             onBlur={validatePassword} // Validate on blur
-            isInvalid={!!passwordError}
+            isInvalid={!!passwordError} // Here, if passwordError is a non-empty string, it will make the form control invalid
           />
+          <Form.Control.Feedback type='invalid'>
+            {passwordError}
+          </Form.Control.Feedback>
         </Form.Group>
       </Row>
 
