@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+# Decentrawill
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+Decentrawill revolutionizes the way wills are created, managed, and executed. In the traditional process of setting up a will, individuals often face challenges such as notary fraud, time-consuming procedures, and the risk of will alteration. Decentrawill eliminates these issues by leveraging blockchain technology, offering a transparent, immutable, and secure platform for automating the terms of wills. Our platform enables testators to have full control over their assets with the flexibility to set their desired conditions and deadlines. By reducing the intermediaries involved, Decentrawill not only simplifies the process but also significantly decreases the potential for fraud, making the transfer of assets seamless and trustworthy.
 
-In the project directory, you can run:
+## Similar Projects and Differentiation
 
-### `npm start`
+Several projects have ventured into the space of blockchain-based wills, such as Blockchain Testament and CryptoWill. However, Decentrawill distinguishes itself in several key aspects:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Identity Verification:** Unlike Blockchain Testament, Decentrawill plans to integrate with Plaid for robust identity verification, enhancing security and trustworthiness.
+- **Flexibility in Deadlines:** Decentrawill offers unparalleled flexibility in setting deadlines for will execution, ranging from days to years, unlike the rigid six-month period seen in similar projects.
+- **Multi-Cryptocurrency Support:** While CryptoWill limits users to one cryptocurrency, Decentrawill is designed to support multiple cryptocurrencies, increasing its utility and accessibility.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Motivation
 
-### `npm test`
+The motivation behind Decentrawill stems from a desire to address the prevalent issues in the traditional will-making process, such as notary fraud and the inefficient transfer of assets. Our aim is to streamline this process, making it faster, more secure, and less costly for individuals to leave their possessions to their chosen successors.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Target Audience
 
-### `npm run build`
+Decentrawill is built for anyone looking to secure their legacy in a transparent, secure, and efficient manner. It caters to individuals who wish to leverage blockchain technology for the seamless transfer of their assets according to their precise wishes.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Planned MVP Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Smart Contract(s):** For creating, modifying, and setting conditions for wills.
+- **User Interface:** A clean, intuitive UI for users to interact with the smart contracts easily.
+- **Decentralized vs. Traditional:** An informational section highlighting the benefits of using Decentrawill over traditional methods.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Reach Goals
 
-### `npm run eject`
+- **Encryption Option:** For users who prefer privacy concerning their will's terms.
+- **Notifications:** Alerts for users and recipients about important deadlines or modifications to the will.
+- **ID Verification:** Implementing a robust user identification system to further secure will transactions.
+- **Monetization:** Exploring viable options for monetizing Decentrawill while maintaining user trust and value.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Tools Used
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Frontend:** ReactJS for a dynamic and responsive user experience.
+- **Backend:** NodeJS for server-side operations and API interactions, including Plaid for identity verification.
+- **Smart Contract Development:** Solidity for writing smart contracts, with Hardhat and Remix for development and testing purposes.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Teamwork
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Frontend Development:** Jassem will lead the design efforts, with Daniel providing support for integrating the smart contract interactions.
+- **Backend Development:** Both Daniel and Jassem will collaborate on backend development tasks.
+- **Smart Contract Development:** Daniel will spearhead the smart contract development, with Jassem assisting in certain aspects.
 
-## Learn More
+Decentrawill is not just a project; it's a step towards redefining how wills are perceived and executed in the digital age. By prioritizing security, transparency, and user autonomy, we aim to provide a solution that respects the wishes of the deceased while making the process as straightforward and fraud-proof as possible for the successors.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Getting Started
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Prerequisites
 
-### Code Splitting
+Before running this project, make sure you have Node.js, git CLI, and npm installed. You can check by running:
+node -v
+npm -v
+git --version
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Installation & Setup
 
-### Analyzing the Bundle Size
+1. Clone the repository
+   git clone [repository URL] cd [local repository]
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Install Dependencies
+Run the following command from inside the project directory to install the required libraries and dependencies:
+npm install
+This command installs dependencies including bootstrap, ethers, firebase, react, and react-router-dom
 
-### Making a Progressive Web App
+2. Register on Firebase
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+3. Create a Firebase project
 
-### Advanced Configuration
+4. Add Authentication for Google and Email providers/sign in methods
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+5. Create a web app by going to Project settings (from the gear icon next to Project Overview). Then go to Your Apps and hit Add app. Make sure to copy firebaseConfig segment in the code snippet that they provide you with.
 
-### Deployment
+6. Back in your coding environment, run npm install firebase.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+—--
+Ignore the hyphenated steps for now
+-Run firebase init and choose Hosting, …
+-Run firebase login on terminal
+-Login with registered account
+-Allow Firebase CLI access to your account
+-After successful authentication, the terminal will show the message “Success!”
+—--
 
-### `npm run build` fails to minify
+7. Then, navigate to decentrawill/src/firebase/Firebase.js (rename Firebase.example.js to Firebase.js first) where you will replace the existing firebaseConfig with the one you were provided with.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+const firebaseConfig = {
+apiKey: '’',
+authDomain: '',
+projectId: '',
+storageBucket: ‘',
+messagingSenderId: '',
+appId: '',
+measurementId: '',
+};
+
+### Running the Application
+
+After setting up the firebase.js and having the dependencies installed you can start the application by running:
+npm start This command runs the app in development mode. Open http://localhost:3000 to view it in the browser in the default case where the backend is already running on port 3000.
