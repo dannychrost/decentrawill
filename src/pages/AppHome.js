@@ -152,6 +152,7 @@ const AppHome = () => {
           Set Allowance
         </Button>
       </Form>
+
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
@@ -184,6 +185,7 @@ const AppHome = () => {
           Set Allocation
         </Button>
       </Form>
+
       <br />
       <h3>Beneficiary Portal</h3>
       <Form onSubmit={handleWithdrawSubmit}>
@@ -200,8 +202,8 @@ const AppHome = () => {
           <Form.Label>Token Address</Form.Label>
           <Form.Control
             type="text"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
+            value={withdrawalToken}
+            onChange={(e) => setWithdrawalToken(e.target.value)}
           />
         </Form.Group>
 
@@ -209,8 +211,8 @@ const AppHome = () => {
           <Form.Label>Amount</Form.Label>
           <Form.Control
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={withdrawalAmount}
+            onChange={(e) => setWithdrawalAmount(e.target.value)}
           />
         </Form.Group>
 
