@@ -22,13 +22,13 @@ export const WalletProvider = ({ children }) => {
         setUserAccount(account);
         setWalletProvider(walletProvider);
 
-        /*setContract(
+        setContract(
           new ethers.Contract(
             contractArtifact.address,
             contractArtifact.abi,
             await walletProvider.getSigner()
           )
-        );*/
+        );
       } catch (error) {
         console.log(error);
       }
@@ -48,6 +48,7 @@ export const WalletProvider = ({ children }) => {
       value={{
         isConnected,
         userAccount,
+        walletProvider,
         handleWalletAction,
         connectWallet,
         disconnectWallet,

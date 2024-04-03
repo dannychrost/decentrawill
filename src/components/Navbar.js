@@ -9,6 +9,8 @@ import { WalletContext } from "../contexts/WalletContext";
 import { useContext } from "react";
 function MainNavbar() {
   const navigate = useNavigate();
+  const { isConnected, userAccount, handleWalletAction } =
+    useContext(WalletContext);
   const { userLoggedIn } = useAuth();
   return (
     <header>
@@ -51,6 +53,14 @@ function MainNavbar() {
                   >
                     Logout
                   </button>
+                  <Button variant="primary" onClick={handleWalletAction}>
+                    {isConnected
+                      ? `${userAccount.substring(
+                          0,
+                          6
+                        )}...${userAccount.substring(userAccount.length - 4)}`
+                      : "Connect Wallet"}
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-column">

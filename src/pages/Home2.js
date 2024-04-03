@@ -6,7 +6,7 @@ import Stack from "react-bootstrap/Stack";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-
+import { ethers } from "ethers";
 const Home2 = () => {
   const { setHeaderValue } = useContext(NavbarContext);
 
