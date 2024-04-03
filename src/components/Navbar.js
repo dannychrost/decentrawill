@@ -80,8 +80,6 @@ function MainNavbar() {
   );
 }
 function AppNavbar() {
-  const { isConnected, userAccount, handleWalletAction } =
-    useContext(WalletContext);
   const navigate = useNavigate();
   const { userLoggedIn } = useAuth();
   return (
@@ -117,13 +115,6 @@ function AppNavbar() {
               )}
             </Nav>
           </Navbar.Collapse>
-          <Button variant="primary" onClick={handleWalletAction}>
-            {isConnected
-              ? `${userAccount.substring(0, 6)}...${userAccount.substring(
-                  userAccount.length - 4
-                )}`
-              : "Connect Wallet"}
-          </Button>
         </Container>
       </Navbar>
     </header>

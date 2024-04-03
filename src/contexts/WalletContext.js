@@ -1,6 +1,7 @@
 // WalletContext.js
-import React, { createContext, useState } from "react";
-import { ethers } from "ethers";
+import React, { createContext, useState } from 'react';
+import { ethers } from 'ethers';
+import contractArtifact from '../contracts/contractArtifact.json';
 
 export const WalletContext = createContext();
 
@@ -8,16 +9,18 @@ export const WalletProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [userAccount, setUserAccount] = useState(null);
   let [walletProvider, setWalletProvider] = useState(null);
+  const [contract, setContract] = useState(null);
+
   const connectWallet = async () => {
     if (window.ethereum == null) {
-      console.log("Wallet not detected!");
+      console.log('Wallet not detected!');
     } else {
       try {
         const [account] = await window.ethereum.request({
-          method: "eth_requestAccounts",
+          method: 'eth_requestAccounts',
         });
         const walletProvider = new ethers.BrowserProvider(window.ethereum);
-        localStorage.removeItem("manuallyDisconnected");
+        localStorage.removeItem('manuallyDisconnected');
         setIsConnected(true);
         setUserAccount(account);
         setWalletProvider(walletProvider);
@@ -36,7 +39,7 @@ export const WalletProvider = ({ children }) => {
   };
   const disconnectWallet = () => {
     if (window.ethereum) {
-      localStorage.setItem("manuallyDisconnected", "true");
+      localStorage.setItem('manuallyDisconnected', 'true');
       setIsConnected(false);
       setUserAccount(null);
     }
@@ -52,6 +55,8 @@ export const WalletProvider = ({ children }) => {
         handleWalletAction,
         connectWallet,
         disconnectWallet,
+        walletProvider,
+        contract,
       }}
     >
       {children}
