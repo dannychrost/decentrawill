@@ -17,10 +17,12 @@
   },
   "homepage": "https://github.com/dannychrost/decentrawill#readme",
   "devDependencies": {
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "hardhat": "^2.22.2"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
     "@remix-project/remixd": "^0.6.29"
   }
 }

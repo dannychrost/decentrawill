@@ -3,7 +3,7 @@ const ethers = require("ethers");
 async function main() {
   const privateKey =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Put your local hardhat node private key here
-  const recipient = ""; // Put your MetaMask address here
+  const recipient = "0xD6e9FAB5a68AAF29027CB236394cF3cb9E8ccA77"; // Put your MetaMask address here
   const amount = ethers.parseEther("1.0"); // 1 Ether
 
   // Connect to the local Hardhat node

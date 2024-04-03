@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.24+commit.e11b9ed9"
+		"version": "0.8.25+commit.b61c2a91"
 	},
 	"language": "Solidity",
 	"output": {
@@ -216,16 +216,52 @@
 				],
 				"stateMutability": "view",
 				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "withdrawTokenForBeneficiary",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
 			}
 		],
 		"devdoc": {
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"withdrawTokenForBeneficiary(address,address,uint256)": {
+					"details": "Withdraws a specified amount of tokens for the beneficiary.",
+					"params": {
+						"amount": "The amount of tokens to be withdrawn.",
+						"creator": "The address of the will creator.",
+						"token": "The address of the token to be withdrawn."
+					}
+				}
+			},
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"withdrawTokenForBeneficiary(address,address,uint256)": {
+					"notice": "This function can only be called by the beneficiary of the token allocation.The function checks if the beneficiary has sufficient allocation before transferring the tokens.The function decreases the allocation before transferring to prevent re-entrancy attacks.The function uses the ERC20 transferFrom function to transfer tokens.The function emits a Transfer event upon successful transfer."
+				}
+			},
 			"version": 1
 		}
 	},
@@ -233,7 +269,7 @@
 		"compilationTarget": {
 			"contracts/DecentraWill.sol": "DecentraWill"
 		},
-		"evmVersion": "shanghai",
+		"evmVersion": "cancun",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -245,12 +281,20 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/DecentraWill.sol": {
-			"keccak256": "0x5d6e83ddcc7bcb6c0b87f0b342ebcb63691c793e1411716913220365d378f688",
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0xc6a8ff0ea489379b61faa647490411b80102578440ab9d84e9a957cc12164e70",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://ae23a92c023c460c93d0853edfcd66ee86a3553633cf2a85d5d82d5670229870",
-				"dweb:/ipfs/QmSkbZm5FQMf7b4WV7vZ16hKqzwuDW9qd5TbqTqvs3cqc3"
+				"bzz-raw://0ea104e577e63faea3b69c415637e99e755dcbf64c5833d7140c35a714d6d90c",
+				"dweb:/ipfs/Qmau6x4Ns9XdyynRCNNp3RhLqijJjFm7z5fyZazfYFGYdq"
+			]
+		},
+		"contracts/DecentraWill.sol": {
+			"keccak256": "0xa5caceffb52c3c85a81df9cbd755c13da8d9e4bc24b9537c9c4da6f73306e0d0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a939ca87ff2b48a036c2131403c25063a40238f283bab32b5876fa222f2af2a8",
+				"dweb:/ipfs/QmfYoJWh1Riwu8uWLjtSvvrNtc93etzX8cczrDfgucyyW5"
 			]
 		}
 	},

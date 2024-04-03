@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DecentraWill {
     address public owner;
@@ -136,5 +137,36 @@ contract DecentraWill {
         } else {
             tokenAllocations[msg.sender][token][recipient] = amount;
         }
+    }
+
+    /**
+     * @dev Withdraws a specified amount of tokens for the beneficiary.
+     * @param creator The address of the will creator.
+     * @param token The address of the token to be withdrawn.
+     * @param amount The amount of tokens to be withdrawn.
+     * @notice This function can only be called by the beneficiary of the token allocation.
+     * @notice The function checks if the beneficiary has sufficient allocation before transferring the tokens.
+     * @notice The function decreases the allocation before transferring to prevent re-entrancy attacks.
+     * @notice The function uses the ERC20 transferFrom function to transfer tokens.
+     * @notice The function emits a Transfer event upon successful transfer.
+     */
+    function withdrawTokenForBeneficiary(
+        address creator,
+        address token,
+        uint256 amount
+    ) public {
+        require(
+            tokenAllocations[creator][token][msg.sender] >= amount,
+            "Insufficient allocation"
+        );
+
+        // Decrease the allocation before transferring to prevent re-entrancy attacks
+        tokenAllocations[creator][token][msg.sender] -= amount;
+
+        // Transfer the tokens from the will creator's account to the beneficiary
+        require(
+            IERC20(token).transferFrom(creator, msg.sender, amount),
+            "Transfer failed"
+        );
     }
 }
