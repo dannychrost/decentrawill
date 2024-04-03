@@ -1,7 +1,7 @@
 // WalletContext.js
-import React, { createContext, useState } from 'react';
-import { ethers } from 'ethers';
-import contractArtifact from '../contracts/contractArtifact.json';
+import React, { createContext, useState } from "react";
+import { ethers } from "ethers";
+import dwArtifact from "../contracts/DecentraWill.json";
 
 export const WalletContext = createContext();
 
@@ -13,22 +13,22 @@ export const WalletProvider = ({ children }) => {
 
   const connectWallet = async () => {
     if (window.ethereum == null) {
-      console.log('Wallet not detected!');
+      console.log("Wallet not detected!");
     } else {
       try {
         const [account] = await window.ethereum.request({
-          method: 'eth_requestAccounts',
+          method: "eth_requestAccounts",
         });
         const walletProvider = new ethers.BrowserProvider(window.ethereum);
-        localStorage.removeItem('manuallyDisconnected');
+        localStorage.removeItem("manuallyDisconnected");
         setIsConnected(true);
         setUserAccount(account);
         setWalletProvider(walletProvider);
 
         setContract(
           new ethers.Contract(
-            contractArtifact.address,
-            contractArtifact.abi,
+            dwArtifact.address,
+            dwArtifact.abi,
             await walletProvider.getSigner()
           )
         );
@@ -39,7 +39,7 @@ export const WalletProvider = ({ children }) => {
   };
   const disconnectWallet = () => {
     if (window.ethereum) {
-      localStorage.setItem('manuallyDisconnected', 'true');
+      localStorage.setItem("manuallyDisconnected", "true");
       setIsConnected(false);
       setUserAccount(null);
     }

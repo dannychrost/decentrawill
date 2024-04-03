@@ -13,7 +13,7 @@ import { WalletContext } from "../contexts/WalletContext";
 const Home2 = () => {
   const { isConnected, userAccount, handleWalletAction, contract } =
     useContext(WalletContext);
-
+  console.log(userAccount);
   if (isConnected) {
     console.log("We are connected to wallet");
     owner();
