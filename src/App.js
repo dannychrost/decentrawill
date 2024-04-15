@@ -18,19 +18,25 @@ function App() {
       <WalletProvider>
         <Router>
           <NavbarProvider>
-            <div className="App">
-              <NavbarContext.Consumer>
-                {({ headerValue }) =>
-                  headerValue === 0 ? <MainNavbar /> : <AppNavbar />
-                }
-              </NavbarContext.Consumer>
+            <div
+              className="App"
+              style={{ display: "flex", flexDirection: "column" }}
+            >
+              <div>
+                <NavbarContext.Consumer>
+                  {({ headerValue }) =>
+                    headerValue === 0 ? <MainNavbar /> : <AppNavbar />
+                  }
+                </NavbarContext.Consumer>
+              </div>
+
               <div
                 style={{
                   background:
                     "linear-gradient(315deg, #e056fd 0%, #000000 74%)",
                   color: "white",
                   padding: "10vw",
-                  height: "100vh",
+
                   overflow: "hidden",
                 }}
               >
@@ -43,7 +49,9 @@ function App() {
                   <Route path="/appHome" element={<AppHome />} />
                 </Routes>
               </div>
-              <FooterNavbar></FooterNavbar>
+              <div>
+                <FooterNavbar></FooterNavbar>
+              </div>
             </div>
           </NavbarProvider>
         </Router>{" "}
