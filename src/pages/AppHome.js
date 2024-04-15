@@ -8,6 +8,38 @@ import { WalletContext, WalletProvider } from "../contexts/WalletContext";
 import { ethers } from "ethers";
 import dwArtifact from "../contracts/DecentraWill.json";
 import IERC20Abi from "../contracts/IERC20.json";
+import { Modal } from "react-bootstrap";
+
+function CustomAlert(props) {
+  const [show, setShow] = useState(true);
+
+  const handleClose = () => {
+    setShow(false);
+    props.onClose(false); // Pass false to indicate "No" option
+  };
+
+  const handleYes = () => {
+    setShow(false);
+    props.onClose(true); // Pass true to indicate "Yes" option
+  };
+
+  return (
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>{props.title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>{props.message}</Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          No
+        </Button>
+        <Button variant="primary" onClick={handleYes}>
+          Yes
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
 
 const WillCards = () => {
   const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
@@ -84,6 +116,7 @@ const AppHome = () => {
   const [amount, setAmount] = useState("");
   const [tokenContractAddress, setTokenContractAddress] = useState("");
   const [allowanceAmount, setAllowanceAmount] = useState("");
+  const [showAlert, setShowAlert] = useState(false); // Initialize showAlert state to false
   const {
     isConnected,
     userAccount,
@@ -94,6 +127,20 @@ const AppHome = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    function CustomAlert(props) {
+      const [show, setShow] = useState(true);
+
+      const handleClose = () => {
+        setShow(false);
+        props.onClose(false); // Pass false to indicate "No" option
+      };
+
+      const handleYes = () => {
+        setShow(false);
+        props.onClose(true); // Pass true to indicate "Yes" option
+      };
+    }
+
     try {
       const tokenAddress = token; // DAI token contract address on Ethereum mainnet
       const tokenContract = new ethers.Contract(
@@ -101,6 +148,46 @@ const AppHome = () => {
         IERC20Abi.abi,
         await walletProvider.getSigner()
       );
+
+      const balanceTx = await tokenContract.balanceOf(userAccount);
+      //await balanceTx.wait();
+      let userBalance = ethers.formatEther(balanceTx);
+      console.log(userBalance);
+
+      if (parseInt(userBalance) < parseInt(amount)) {
+        setShowAlert(true); // Set showAlert to true to show the alert modal
+        return; // Exit the function early since the modal will be shown
+      }
+
+      // if (parseInt(userBalance) < parseInt(amount)) {
+      //   console.log('Not enough funds');
+      //   console.log('You only have ' + amount);
+
+      //   const handleAlertClose = (result) => {
+      //     setShowAlert(false);
+      //     if (result) {
+      //       // Yes option clicked
+      //       console.log('User clicked Yes');
+      //       // Add your code for handling "Yes" option here
+      //     } else {
+      //       // No option clicked
+      //       console.log('User clicked No');
+      //       // Add your code for handling "No" option here
+      //     }
+      //   };
+
+      //   return (
+      //     <div className='App'>
+      //       {showAlert && (
+      //         <CustomAlert
+      //           title='Confirmation'
+      //           message='Do you want to proceed?'
+      //           onClose={handleAlertClose}
+      //         />
+      //       )}
+      //     </div>
+      //   );
+      // }
 
       const tx = await contract.setAllocation(
         token,
@@ -266,9 +353,28 @@ const AppHome = () => {
           Set Allocation
         </Button>
       </Form>
+
+      {showAlert && ( // Render the CustomAlert component conditionally based on showAlert state
+        <CustomAlert
+          title="Confirmation"
+          message="Do you want to proceed?"
+          onClose={(result) => {
+            setShowAlert(false); // Close the modal and update showAlert state based on user's choice
+            if (result) {
+              // Yes option clicked
+              console.log("User clicked Yes");
+              // Add your code for handling "Yes" option here
+            } else {
+              // No option clicked
+              console.log("User clicked No");
+              // Add your code for handling "No" option here
+            }
+          }}
+        />
+      )}
+
       <br />
       <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
-      <WillCards />
       <br />
       <h3>Beneficiary Portal</h3>
 
