@@ -218,7 +218,7 @@ const AppHome = () => {
     <>
       <h3>Creator Portal</h3>
       {/*Here we set the allowance for the DecentraWill contract*/}
-      <h4 style={{ color: "#e056fd" }}>
+      <h4 style={{ color: '#e056fd' }}>
         How much token control to give DecentraWill?
       </h4>
       <Form onSubmit={handleAllowanceSubmit}>
@@ -228,7 +228,7 @@ const AppHome = () => {
             type='text'
             value={tokenContractAddress}
             onChange={(e) => setTokenContractAddress(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
         </Form.Group>
 
@@ -238,7 +238,7 @@ const AppHome = () => {
             type='number'
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
-            placeholder="How many tokens should DecentraWill be able to access on your behalf?"
+            placeholder='How many tokens should DecentraWill be able to access on your behalf?'
           />
         </Form.Group>
 
@@ -248,7 +248,7 @@ const AppHome = () => {
       </Form>
       <br />
       {/*Here we set the allocation for the beneficiary*/}
-      <h4 style={{ color: "#e056fd" }}>
+      <h4 style={{ color: '#e056fd' }}>
         How much tokens should this beneficiary receive?
       </h4>
       <Form onSubmit={handleSubmit}>
@@ -258,7 +258,7 @@ const AppHome = () => {
             type='text'
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
         </Form.Group>
 
@@ -278,7 +278,7 @@ const AppHome = () => {
             type='number'
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Please specify the amount of tokens to allocate to this beneficiary."
+            placeholder='Please specify the amount of tokens to allocate to this beneficiary.'
           />
         </Form.Group>
 
@@ -286,8 +286,28 @@ const AppHome = () => {
           Set Allocation
         </Button>
       </Form>
+
+      {showAlert && ( // Render the CustomAlert component conditionally based on showAlert state
+        <CustomAlert
+          title='Confirmation'
+          message='Do you want to proceed?'
+          onClose={(result) => {
+            setShowAlert(false); // Close the modal and update showAlert state based on user's choice
+            if (result) {
+              // Yes option clicked
+              console.log('User clicked Yes');
+              // Add your code for handling "Yes" option here
+            } else {
+              // No option clicked
+              console.log('User clicked No');
+              // Add your code for handling "No" option here
+            }
+          }}
+        />
+      )}
+
       <br />
-      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <h4 style={{ color: '#e056fd' }}>Existing Wills</h4>
       <br />
       <h3>Beneficiary Portal</h3>
 
@@ -308,7 +328,7 @@ const AppHome = () => {
             type='text'
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
         </Form.Group>
 
@@ -327,7 +347,7 @@ const AppHome = () => {
         </Button>
       </Form>
       <br />
-      <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
+      <h4 style={{ color: '#e056fd' }}>Tokens allocated to you</h4>
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
