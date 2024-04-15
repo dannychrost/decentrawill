@@ -217,13 +217,18 @@ const AppHome = () => {
   return (
     <>
       <h3>Creator Portal</h3>
+      {/*Here we set the allowance for the DecentraWill contract*/}
+      <h4 style={{ color: "#e056fd" }}>
+        How much token control to give DecentraWill?
+      </h4>
       <Form onSubmit={handleAllowanceSubmit}>
         <Form.Group>
-          <Form.Label>Token Contract Address</Form.Label>
+          <Form.Label>Token Address</Form.Label>
           <Form.Control
             type='text'
             value={tokenContractAddress}
             onChange={(e) => setTokenContractAddress(e.target.value)}
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
@@ -233,6 +238,7 @@ const AppHome = () => {
             type='number'
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
+            placeholder="How many tokens should DecentraWill be able to access on your behalf?"
           />
         </Form.Group>
 
@@ -240,7 +246,11 @@ const AppHome = () => {
           Set Allowance
         </Button>
       </Form>
-
+      <br />
+      {/*Here we set the allocation for the beneficiary*/}
+      <h4 style={{ color: "#e056fd" }}>
+        How much tokens should this beneficiary receive?
+      </h4>
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
@@ -248,6 +258,7 @@ const AppHome = () => {
             type='text'
             value={token}
             onChange={(e) => setToken(e.target.value)}
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
@@ -257,6 +268,7 @@ const AppHome = () => {
             type='text'
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
+            placeholder="Please specify the address of the will's beneficiary for token withdrawal. For multiple beneficiaries, you will have to set the allocation for each beneficiary separately."
           />
         </Form.Group>
 
@@ -266,6 +278,7 @@ const AppHome = () => {
             type='number'
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            placeholder="Please specify the amount of tokens to allocate to this beneficiary."
           />
         </Form.Group>
 
@@ -273,9 +286,11 @@ const AppHome = () => {
           Set Allocation
         </Button>
       </Form>
-
+      <br />
+      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
       <br />
       <h3>Beneficiary Portal</h3>
+
       <Form onSubmit={handleWithdrawSubmit}>
         <Form.Group>
           <Form.Label>Creator Address</Form.Label>
@@ -283,6 +298,7 @@ const AppHome = () => {
             type='text'
             value={creator}
             onChange={(e) => setCreator(e.target.value)}
+            placeholder="Please specify the will creator's wallet address."
           />
         </Form.Group>
 
@@ -292,6 +308,7 @@ const AppHome = () => {
             type='text'
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
@@ -301,6 +318,7 @@ const AppHome = () => {
             type='number'
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(e.target.value)}
+            placeholder="Please specify the amount of tokens you'd like to withdraw."
           />
         </Form.Group>
 
@@ -308,6 +326,8 @@ const AppHome = () => {
           Withdraw
         </Button>
       </Form>
+      <br />
+      <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
