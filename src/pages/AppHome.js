@@ -1,38 +1,27 @@
-import React, { useState } from 'react';
-import { Form, Button, Col, Row, InputGroup } from 'react-bootstrap';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import { useEffect, useContext } from 'react';
-import { WalletContext, WalletProvider } from '../contexts/WalletContext';
-import { ethers } from 'ethers';
-import dwArtifact from '../contracts/DecentraWill.json';
-import IERC20Abi from '../contracts/IERC20.json';
-import { Modal } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Form, Button, Col, Row, Card, InputGroup } from "react-bootstrap";
 
-function CustomAlert(props) {
-  const [show, setShow] = useState(true);
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import { useEffect, useContext } from "react";
+import { WalletContext, WalletProvider } from "../contexts/WalletContext";
+import { ethers } from "ethers";
+import dwArtifact from "../contracts/DecentraWill.json";
+import IERC20Abi from "../contracts/IERC20.json";
+import { Modal } from "react-bootstrap";
 
-  const handleClose = () => {
-    setShow(false);
-    props.onClose(false); // Pass false to indicate "No" option
-  };
-
-  const handleYes = () => {
-    setShow(false);
-    props.onClose(true); // Pass true to indicate "Yes" option
-  };
-
+function CustomAlert({ show, onClose, title, message }) {
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={() => onClose(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>{props.title}</Modal.Title>
+        <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{props.message}</Modal.Body>
+      <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
-        <Button variant='secondary' onClick={handleClose}>
+        <Button variant="secondary" onClick={() => onClose(false)}>
           No
         </Button>
-        <Button variant='primary' onClick={handleYes}>
+        <Button variant="primary" onClick={() => onClose(true)}>
           Yes
         </Button>
       </Modal.Footer>
@@ -40,15 +29,81 @@ function CustomAlert(props) {
   );
 }
 
+const WillCards = () => {
+  const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
+  const { contract, userAccount } = useContext(WalletContext);
+
+  useEffect(() => {
+    const fetchWills = async () => {
+      if (!userAccount) return; // Ensure userAccount is available
+      const tokens = await contract.getAllocatedTokensByUser(userAccount);
+      for (let a = 0; a < tokens.length; a++) {
+        console.log(tokens[a]);
+      }
+
+      const userAllocations = await Promise.all(
+        tokens.map(async (token) => {
+          const recipients = await contract.getRecipientsByToken(
+            userAccount,
+            token
+          );
+          const details = await Promise.all(
+            recipients.map(async (recipient) => {
+              const amount = await contract.tokenAllocations(
+                userAccount,
+                token,
+                recipient
+              );
+              return {
+                token,
+                recipient,
+                amount: ethers.formatEther(amount), // Ensuring proper use of ethers formatting
+              };
+            })
+          );
+          return details.flat(); // Flatten to handle nested arrays properly
+        })
+      );
+      setAllocations(userAllocations.flat()); // Set the allocations state
+    };
+
+    if (contract && userAccount) {
+      console.log("Fetching wills");
+      fetchWills();
+    }
+  }, [contract, userAccount]); // Depend on contract and userAccount to refresh data
+
+  return (
+    <Row xs={1} md={3} className="g-4">
+      {allocations.map((alloc, idx) => (
+        <Col key={idx}>
+          <Card>
+            <Card.Header as="h5">
+              Beneficiary:<Card.Subtitle> {alloc.recipient}</Card.Subtitle>
+            </Card.Header>
+
+            <Card.Body>
+              <Card.Subtitle>Token:</Card.Subtitle>
+              <Card.Text>{alloc.token}</Card.Text>
+              <Card.Subtitle>Amount:</Card.Subtitle>
+              <Card.Text>{alloc.amount} Tokens</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+};
+
 const AppHome = () => {
   // The following code is for the creator portal
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
   const [trusteeRows, setTrusteeRows] = useState([{ id: 1 }]);
-  const [token, setToken] = useState('');
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('');
-  const [tokenContractAddress, setTokenContractAddress] = useState('');
-  const [allowanceAmount, setAllowanceAmount] = useState('');
+  const [token, setToken] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState("");
+  const [tokenContractAddress, setTokenContractAddress] = useState("");
+  const [allowanceAmount, setAllowanceAmount] = useState("");
   const [showAlert, setShowAlert] = useState(false); // Initialize showAlert state to false
   const {
     isConnected,
@@ -57,81 +112,40 @@ const AppHome = () => {
     contract,
     walletProvider,
   } = useContext(WalletContext);
-  const handleSubmit = async (event) => {
-    event.preventDefault();
 
-    function CustomAlert(props) {
-      const [show, setShow] = useState(true);
+  const [showModal, setShowModal] = useState(false); // For controlling the display of the modal
 
-      const handleClose = () => {
-        setShow(false);
-        props.onClose(false); // Pass false to indicate "No" option
-      };
+  const checkAndProceedWithAllocation = async () => {
+    const tokenContract = new ethers.Contract(
+      token,
+      IERC20Abi.abi,
+      await walletProvider.getSigner()
+    );
+    const balance = await tokenContract.balanceOf(userAccount);
+    const balanceInEther = ethers.formatEther(balance);
 
-      const handleYes = () => {
-        setShow(false);
-        props.onClose(true); // Pass true to indicate "Yes" option
-      };
+    if (parseFloat(balanceInEther) < parseFloat(amount)) {
+      setShowModal(true); // Show modal to ask for user confirmation
+    } else {
+      proceedWithAllocation(); // Directly proceed if balance is sufficient
     }
-
+  };
+  const proceedWithAllocation = async () => {
     try {
-      const tokenAddress = token; // DAI token contract address on Ethereum mainnet
-      const tokenContract = new ethers.Contract(
-        tokenAddress,
-        IERC20Abi.abi,
-        await walletProvider.getSigner()
-      );
-
-      const balanceTx = await tokenContract.balanceOf(userAccount);
-      //await balanceTx.wait();
-      let userBalance = ethers.formatEther(balanceTx);
-      console.log(userBalance);
-
-      if (parseInt(userBalance) < parseInt(amount)) {
-        setShowAlert(true); // Set showAlert to true to show the alert modal
-        return; // Exit the function early since the modal will be shown
-      }
-
-      // if (parseInt(userBalance) < parseInt(amount)) {
-      //   console.log('Not enough funds');
-      //   console.log('You only have ' + amount);
-
-      //   const handleAlertClose = (result) => {
-      //     setShowAlert(false);
-      //     if (result) {
-      //       // Yes option clicked
-      //       console.log('User clicked Yes');
-      //       // Add your code for handling "Yes" option here
-      //     } else {
-      //       // No option clicked
-      //       console.log('User clicked No');
-      //       // Add your code for handling "No" option here
-      //     }
-      //   };
-
-      //   return (
-      //     <div className='App'>
-      //       {showAlert && (
-      //         <CustomAlert
-      //           title='Confirmation'
-      //           message='Do you want to proceed?'
-      //           onClose={handleAlertClose}
-      //         />
-      //       )}
-      //     </div>
-      //   );
-      // }
-
       const tx = await contract.setAllocation(
         token,
         recipient,
         ethers.parseEther(amount)
       );
-
       await tx.wait();
+      console.log("Allocation set successfully.");
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
+  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await checkAndProceedWithAllocation();
   };
   /**
    * Handles the submission of the allowance form.
@@ -146,7 +160,7 @@ const AppHome = () => {
         ethers.parseEther(allowanceAmount)
       );
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
   };
   /**
@@ -183,7 +197,7 @@ const AppHome = () => {
 
   useEffect(() => {
     if (isConnected && contract) {
-      console.log('We are connected to wallet');
+      console.log("We are connected to wallet");
       owner();
       console.log(userAccount);
     }
@@ -195,9 +209,9 @@ const AppHome = () => {
   }
 
   // The following code is for the beneficiary portal
-  const [creator, setCreator] = useState('');
-  const [withdrawalToken, setWithdrawalToken] = useState('');
-  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [creator, setCreator] = useState("");
+  const [withdrawalToken, setWithdrawalToken] = useState("");
+  const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const handleWithdrawSubmit = async (event) => {
     event.preventDefault();
 
@@ -210,7 +224,7 @@ const AppHome = () => {
 
       await tx.wait();
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
   };
 
@@ -218,54 +232,54 @@ const AppHome = () => {
     <>
       <h3>Creator Portal</h3>
       {/*Here we set the allowance for the DecentraWill contract*/}
-      <h4 style={{ color: '#e056fd' }}>
+      <h4 style={{ color: "#e056fd" }}>
         How much token control to give DecentraWill?
       </h4>
       <Form onSubmit={handleAllowanceSubmit}>
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type='text'
+            type="text"
             value={tokenContractAddress}
             onChange={(e) => setTokenContractAddress(e.target.value)}
-            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Allowance Amount</Form.Label>
           <Form.Control
-            type='number'
+            type="number"
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
-            placeholder='How many tokens should DecentraWill be able to access on your behalf?'
+            placeholder="How many tokens should DecentraWill be able to access on your behalf?"
           />
         </Form.Group>
 
-        <Button variant='primary' type='submit'>
+        <Button variant="primary" type="submit">
           Set Allowance
         </Button>
       </Form>
       <br />
       {/*Here we set the allocation for the beneficiary*/}
-      <h4 style={{ color: '#e056fd' }}>
+      <h4 style={{ color: "#e056fd" }}>
         How much tokens should this beneficiary receive?
       </h4>
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type='text'
+            type="text"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Beneficiary Address</Form.Label>
           <Form.Control
-            type='text'
+            type="text"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Please specify the address of the will's beneficiary for token withdrawal. For multiple beneficiaries, you will have to set the allocation for each beneficiary separately."
@@ -275,39 +289,37 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type='number'
+            type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder='Please specify the amount of tokens to allocate to this beneficiary.'
+            placeholder="Please specify the amount of tokens to allocate to this beneficiary."
           />
         </Form.Group>
 
-        <Button variant='primary' type='submit'>
+        <Button variant="primary" type="submit">
           Set Allocation
         </Button>
       </Form>
 
-      {showAlert && ( // Render the CustomAlert component conditionally based on showAlert state
+      {showModal && (
         <CustomAlert
-          title='Confirmation'
-          message='Do you want to proceed?'
-          onClose={(result) => {
-            setShowAlert(false); // Close the modal and update showAlert state based on user's choice
-            if (result) {
-              // Yes option clicked
-              console.log('User clicked Yes');
-              // Add your code for handling "Yes" option here
+          show={showModal}
+          onClose={(userConfirmed) => {
+            setShowModal(false); // Always close the modal
+            if (userConfirmed) {
+              proceedWithAllocation(); // Proceed only if user confirms
             } else {
-              // No option clicked
-              console.log('User clicked No');
-              // Add your code for handling "No" option here
+              console.log("User cancelled the operation.");
             }
           }}
+          title="Confirm Allocation"
+          message="The allocation amount exceeds your balance. Do you want to proceed?"
         />
       )}
 
       <br />
-      <h4 style={{ color: '#e056fd' }}>Existing Wills</h4>
+      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <WillCards />
       <br />
       <h3>Beneficiary Portal</h3>
 
@@ -315,7 +327,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Creator Address</Form.Label>
           <Form.Control
-            type='text'
+            type="text"
             value={creator}
             onChange={(e) => setCreator(e.target.value)}
             placeholder="Please specify the will creator's wallet address."
@@ -325,29 +337,29 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type='text'
+            type="text"
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
-            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
+            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
           />
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type='number'
+            type="number"
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(e.target.value)}
             placeholder="Please specify the amount of tokens you'd like to withdraw."
           />
         </Form.Group>
 
-        <Button variant='primary' type='submit'>
+        <Button variant="primary" type="submit">
           Withdraw
         </Button>
       </Form>
       <br />
-      <h4 style={{ color: '#e056fd' }}>Tokens allocated to you</h4>
+      <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
