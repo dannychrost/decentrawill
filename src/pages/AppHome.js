@@ -1,21 +1,55 @@
-import React, { useState } from "react";
-import { Form, Button, Col, Row, InputGroup } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import { useEffect, useContext } from "react";
-import { WalletContext, WalletProvider } from "../contexts/WalletContext";
-import { ethers } from "ethers";
-import dwArtifact from "../contracts/DecentraWill.json";
-import IERC20Abi from "../contracts/IERC20.json";
+import React, { useState } from 'react';
+import { Form, Button, Col, Row, InputGroup } from 'react-bootstrap';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import { useEffect, useContext } from 'react';
+import { WalletContext, WalletProvider } from '../contexts/WalletContext';
+import { ethers } from 'ethers';
+import dwArtifact from '../contracts/DecentraWill.json';
+import IERC20Abi from '../contracts/IERC20.json';
+import { Modal } from 'react-bootstrap';
+
+function CustomAlert(props) {
+  const [show, setShow] = useState(true);
+
+  const handleClose = () => {
+    setShow(false);
+    props.onClose(false); // Pass false to indicate "No" option
+  };
+
+  const handleYes = () => {
+    setShow(false);
+    props.onClose(true); // Pass true to indicate "Yes" option
+  };
+
+  return (
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>{props.title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>{props.message}</Modal.Body>
+      <Modal.Footer>
+        <Button variant='secondary' onClick={handleClose}>
+          No
+        </Button>
+        <Button variant='primary' onClick={handleYes}>
+          Yes
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
 const AppHome = () => {
   // The following code is for the creator portal
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
   const [trusteeRows, setTrusteeRows] = useState([{ id: 1 }]);
-  const [token, setToken] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [tokenContractAddress, setTokenContractAddress] = useState("");
-  const [allowanceAmount, setAllowanceAmount] = useState("");
+  const [token, setToken] = useState('');
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+  const [tokenContractAddress, setTokenContractAddress] = useState('');
+  const [allowanceAmount, setAllowanceAmount] = useState('');
+  const [showAlert, setShowAlert] = useState(false); // Initialize showAlert state to false
   const {
     isConnected,
     userAccount,
@@ -26,6 +60,20 @@ const AppHome = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    function CustomAlert(props) {
+      const [show, setShow] = useState(true);
+
+      const handleClose = () => {
+        setShow(false);
+        props.onClose(false); // Pass false to indicate "No" option
+      };
+
+      const handleYes = () => {
+        setShow(false);
+        props.onClose(true); // Pass true to indicate "Yes" option
+      };
+    }
+
     try {
       const tokenAddress = token; // DAI token contract address on Ethereum mainnet
       const tokenContract = new ethers.Contract(
@@ -33,6 +81,46 @@ const AppHome = () => {
         IERC20Abi.abi,
         await walletProvider.getSigner()
       );
+
+      const balanceTx = await tokenContract.balanceOf(userAccount);
+      //await balanceTx.wait();
+      let userBalance = ethers.formatEther(balanceTx);
+      console.log(userBalance);
+
+      if (parseInt(userBalance) < parseInt(amount)) {
+        setShowAlert(true); // Set showAlert to true to show the alert modal
+        return; // Exit the function early since the modal will be shown
+      }
+
+      // if (parseInt(userBalance) < parseInt(amount)) {
+      //   console.log('Not enough funds');
+      //   console.log('You only have ' + amount);
+
+      //   const handleAlertClose = (result) => {
+      //     setShowAlert(false);
+      //     if (result) {
+      //       // Yes option clicked
+      //       console.log('User clicked Yes');
+      //       // Add your code for handling "Yes" option here
+      //     } else {
+      //       // No option clicked
+      //       console.log('User clicked No');
+      //       // Add your code for handling "No" option here
+      //     }
+      //   };
+
+      //   return (
+      //     <div className='App'>
+      //       {showAlert && (
+      //         <CustomAlert
+      //           title='Confirmation'
+      //           message='Do you want to proceed?'
+      //           onClose={handleAlertClose}
+      //         />
+      //       )}
+      //     </div>
+      //   );
+      // }
 
       const tx = await contract.setAllocation(
         token,
@@ -42,7 +130,7 @@ const AppHome = () => {
 
       await tx.wait();
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
     }
   };
   /**
@@ -58,7 +146,7 @@ const AppHome = () => {
         ethers.parseEther(allowanceAmount)
       );
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
     }
   };
   /**
@@ -95,7 +183,7 @@ const AppHome = () => {
 
   useEffect(() => {
     if (isConnected && contract) {
-      console.log("We are connected to wallet");
+      console.log('We are connected to wallet');
       owner();
       console.log(userAccount);
     }
@@ -107,9 +195,9 @@ const AppHome = () => {
   }
 
   // The following code is for the beneficiary portal
-  const [creator, setCreator] = useState("");
-  const [withdrawalToken, setWithdrawalToken] = useState("");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [creator, setCreator] = useState('');
+  const [withdrawalToken, setWithdrawalToken] = useState('');
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const handleWithdrawSubmit = async (event) => {
     event.preventDefault();
 
@@ -122,7 +210,7 @@ const AppHome = () => {
 
       await tx.wait();
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
     }
   };
 
@@ -133,7 +221,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Contract Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={tokenContractAddress}
             onChange={(e) => setTokenContractAddress(e.target.value)}
           />
@@ -142,13 +230,13 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Allowance Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allowance
         </Button>
       </Form>
@@ -157,7 +245,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={token}
             onChange={(e) => setToken(e.target.value)}
           />
@@ -166,7 +254,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Beneficiary Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
           />
@@ -175,13 +263,13 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allocation
         </Button>
       </Form>
@@ -192,7 +280,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Creator Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={creator}
             onChange={(e) => setCreator(e.target.value)}
           />
@@ -201,7 +289,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
           />
@@ -210,13 +298,13 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(e.target.value)}
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Withdraw
         </Button>
       </Form>
