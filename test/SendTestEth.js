@@ -1,13 +1,13 @@
-const ethers = require("ethers");
+const ethers = require('ethers');
 
 async function main() {
   const privateKey =
-    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Put your local hardhat node private key here
-  const recipient = "0xD6e9FAB5a68AAF29027CB236394cF3cb9E8ccA77"; // Put your MetaMask address here
-  const amount = ethers.parseEther("1.0"); // 1 Ether
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'; // Put your local hardhat node private key here
+  const recipient = '0xD71603C15CB21B0016EacE3626C8242c1E2eCb7C'; // Put your MetaMask address here
+  const amount = ethers.parseEther('1.0'); // 1 Ether
 
   // Connect to the local Hardhat node
-  const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+  const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
 
   // Create a new wallet instance
   const wallet = new ethers.Wallet(privateKey, provider);
