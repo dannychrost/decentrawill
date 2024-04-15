@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Form, Button, Col, Row, InputGroup } from "react-bootstrap";
+import { Form, Button, Col, Row, Card, InputGroup } from "react-bootstrap";
+
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import { useEffect, useContext } from "react";
@@ -7,6 +8,73 @@ import { WalletContext, WalletProvider } from "../contexts/WalletContext";
 import { ethers } from "ethers";
 import dwArtifact from "../contracts/DecentraWill.json";
 import IERC20Abi from "../contracts/IERC20.json";
+
+const WillCards = () => {
+  const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
+  const { contract, userAccount } = useContext(WalletContext);
+
+  useEffect(() => {
+    const fetchWills = async () => {
+      if (!userAccount) return; // Ensure userAccount is available
+      const tokens = await contract.getAllocatedTokensByUser(userAccount);
+      for (let a = 0; a < tokens.length; a++) {
+        console.log(tokens[a]);
+      }
+
+      const userAllocations = await Promise.all(
+        tokens.map(async (token) => {
+          const recipients = await contract.getRecipientsByToken(
+            userAccount,
+            token
+          );
+          const details = await Promise.all(
+            recipients.map(async (recipient) => {
+              const amount = await contract.tokenAllocations(
+                userAccount,
+                token,
+                recipient
+              );
+              return {
+                token,
+                recipient,
+                amount: ethers.formatEther(amount), // Ensuring proper use of ethers formatting
+              };
+            })
+          );
+          return details.flat(); // Flatten to handle nested arrays properly
+        })
+      );
+      setAllocations(userAllocations.flat()); // Set the allocations state
+    };
+
+    if (contract && userAccount) {
+      console.log("Fetching wills");
+      fetchWills();
+    }
+  }, [contract, userAccount]); // Depend on contract and userAccount to refresh data
+
+  return (
+    <Row xs={1} md={3} className="g-4">
+      {allocations.map((alloc, idx) => (
+        <Col key={idx}>
+          <Card>
+            <Card.Header as="h5">User: {userAccount}</Card.Header>
+            <Card.Body>
+              <Card.Title>Token: {alloc.token}</Card.Title>
+              <Card.Text>
+                Recipient: {alloc.recipient}
+                <br />
+                Amount: {alloc.amount} Tokens
+              </Card.Text>
+              <Button variant="primary">View More Details</Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+};
+
 const AppHome = () => {
   // The following code is for the creator portal
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
@@ -200,6 +268,7 @@ const AppHome = () => {
       </Form>
       <br />
       <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <WillCards />
       <br />
       <h3>Beneficiary Portal</h3>
 
