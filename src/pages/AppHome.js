@@ -5,7 +5,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import { useEffect, useContext } from "react";
 import { WalletContext, WalletProvider } from "../contexts/WalletContext";
-import { ethers } from "ethers";
+import { JsonRpcProvider, ethers, getDefaultProvider } from "ethers";
 import dwArtifact from "../contracts/DecentraWill.json";
 import IERC20Abi from "../contracts/IERC20.json";
 import { Modal } from "react-bootstrap";
@@ -87,6 +87,92 @@ const WillCards = () => {
               <Card.Text>{alloc.token}</Card.Text>
               <Card.Subtitle>Amount:</Card.Subtitle>
               <Card.Text>{alloc.amount} Tokens</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+};
+
+const BeneficiaryWills = () => {
+  const [beneficiaryWills, setBeneficiaryWills] = useState([]);
+  const { contract, userAccount, walletProvider } = useContext(WalletContext);
+
+  useEffect(() => {
+    const fetchBeneficiaryWills = async () => {
+      if (!userAccount || !contract) return;
+
+      try {
+        // Fetch creators who have allocated tokens to the beneficiary
+        let creators = [];
+        let index = 0; // Start index from 0
+        let errorOccurred = false;
+
+        while (!errorOccurred) {
+          try {
+            const creatorAddress = await contract.creatorsForBeneficiary(
+              ethers.getAddress(userAccount),
+              index
+            );
+            creators.push(creatorAddress);
+            index++; // Increment index to fetch next creator
+          } catch (error) {
+            errorOccurred = true; // Stop the loop if an error occurs
+          }
+        }
+        const willsData = [];
+
+        for (const creator of creators) {
+          // For each creator, fetch the tokens they have allocated to this beneficiary
+          const tokens = await contract.getAllocatedTokensByUser(creator);
+
+          for (const token of tokens) {
+            // Check the allocation for the beneficiary
+            const amount = await contract.tokenAllocations(
+              creator,
+              token,
+              userAccount
+            );
+            /*const tokenContract = new ethers.Contract(
+              token,
+              IERC20Abi.abi,
+              await walletProvider.getSigner()
+            );*/
+            //const balance = await tokenContract.symbol();
+            //console.log(balance);
+            if (amount > 0) {
+              willsData.push({
+                creator: creator,
+                token: token,
+                amount: ethers.formatEther(amount), // Convert amount from Wei to Ether
+              });
+            }
+          }
+        }
+
+        setBeneficiaryWills(willsData);
+      } catch (error) {
+        //console.error("Error fetching beneficiary wills:", error);
+      }
+    };
+
+    fetchBeneficiaryWills();
+  }, [userAccount, contract]);
+
+  return (
+    <Row xs={1} md={3} className="g-4">
+      {beneficiaryWills.map((will, idx) => (
+        <Col key={idx}>
+          <Card>
+            <Card.Header as="h5">Will Details</Card.Header>
+            <Card.Body>
+              <Card.Title>Token: {will.token}</Card.Title>
+              <Card.Text>
+                Creator: {will.creator}
+                <br />
+                Amount: {will.amount} Tokens
+              </Card.Text>
             </Card.Body>
           </Card>
         </Col>
@@ -360,6 +446,7 @@ const AppHome = () => {
       </Form>
       <br />
       <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
+      <BeneficiaryWills />
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
