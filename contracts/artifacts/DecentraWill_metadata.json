@@ -12,6 +12,16 @@
 			},
 			{
 				"inputs": [],
+				"name": "DeadlineNotMet",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InvalidDeadline",
+				"type": "error"
+			},
+			{
+				"inputs": [],
 				"name": "NoAllocationAvailable",
 				"type": "error"
 			},
@@ -116,6 +126,25 @@
 				],
 				"name": "Withdrawal",
 				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "creatorDeadlines",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
 			},
 			{
 				"inputs": [
@@ -299,6 +328,19 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "newDeadline",
+						"type": "uint256"
+					}
+				],
+				"name": "setCreatorDeadline",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "",
 						"type": "address"
@@ -370,7 +412,7 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
+			"enabled": false,
 			"runs": 200
 		},
 		"remappings": []
@@ -385,11 +427,11 @@
 			]
 		},
 		"contracts/DecentraWill.sol": {
-			"keccak256": "0x1086834dc87e546721e113e399ec23a0e2a8082cff28c8c98a21d7d751aa82cd",
+			"keccak256": "0x48efeb8dae922184e1b77a820bab1ee3582387e0f42556e65f464fd434dbc6ee",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://ca539a6d0a490aa0438ed69cf2ae48c7df64fca6fa16acfc0f4c96fc2fd8740c",
-				"dweb:/ipfs/QmNqCQxDyuugydQRqKzi6eFzyHW9UXRxWKsiGGy9mE2zvf"
+				"bzz-raw://2764aea61e8e4660c7e05ae972438d3b029445e56e4997ddb630b4e6e97f704a",
+				"dweb:/ipfs/QmY47AdvDXJrrE8bfvdvBRzBCBpqwhPwDsdXYhx4kY8Bkq"
 			]
 		}
 	},
