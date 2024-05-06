@@ -1,14 +1,38 @@
-import React, { useState } from "react";
-import { Form, Button, Col, Row, Card, InputGroup } from "react-bootstrap";
+import React, { useState } from 'react';
+import { Form, Button, Col, Row, Card, InputGroup } from 'react-bootstrap';
 
-import Dropdown from "react-bootstrap/Dropdown";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import { useEffect, useContext } from "react";
-import { WalletContext, WalletProvider } from "../contexts/WalletContext";
-import { ethers } from "ethers";
-import dwArtifact from "../contracts/DecentraWill.json";
-import IERC20Abi from "../contracts/IERC20.json";
-import { Modal } from "react-bootstrap";
+import { Dropdown } from 'react-bootstrap';
+import { DropdownButton } from 'react-bootstrap';
+import { useEffect, useContext } from 'react';
+import { WalletContext, WalletProvider } from '../contexts/WalletContext';
+import { ethers } from 'ethers';
+import dwArtifact from '../contracts/DecentraWill.json';
+import IERC20Abi from '../contracts/IERC20.json';
+import { Modal } from 'react-bootstrap';
+
+const tokens = [
+  {
+    symbol: 'mUSDC',
+    imageUrl:
+      'https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png',
+    name: 'USD Coin',
+    address: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512', // Adding the address
+  },
+  {
+    symbol: 'wETH',
+    imageUrl:
+      'https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png',
+    name: 'Ethereum',
+    address: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0', // Adding the address
+  },
+  {
+    symbol: 'wBTC',
+    imageUrl:
+      'https://dynamic-assets.coinbase.com/e785e0181f1a23a30d9476038d9be91e9f6c63959b538eabbc51a1abc8898940383291eede695c3b8dfaa1829a9b57f5a2d0a16b0523580346c6b8fab67af14b/asset_icons/b57ac673f06a4b0338a596817eb0a50ce16e2059f327dc117744449a47915cb2.png',
+    name: 'Bitcoin',
+    address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // Adding the address
+  },
+];
 
 function CustomAlert({ show, onClose, title, message }) {
   return (
@@ -18,10 +42,10 @@ function CustomAlert({ show, onClose, title, message }) {
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => onClose(false)}>
+        <Button variant='secondary' onClick={() => onClose(false)}>
           No
         </Button>
-        <Button variant="primary" onClick={() => onClose(true)}>
+        <Button variant='primary' onClick={() => onClose(true)}>
           Yes
         </Button>
       </Modal.Footer>
@@ -68,17 +92,17 @@ const WillCards = () => {
     };
 
     if (contract && userAccount) {
-      console.log("Fetching wills");
+      console.log('Fetching wills');
       fetchWills();
     }
   }, [contract, userAccount]); // Depend on contract and userAccount to refresh data
 
   return (
-    <Row xs={1} md={3} className="g-4">
+    <Row xs={1} md={3} className='g-4'>
       {allocations.map((alloc, idx) => (
         <Col key={idx}>
           <Card>
-            <Card.Header as="h5">
+            <Card.Header as='h5'>
               Beneficiary:<Card.Subtitle> {alloc.recipient}</Card.Subtitle>
             </Card.Header>
 
@@ -97,13 +121,14 @@ const WillCards = () => {
 
 const AppHome = () => {
   // The following code is for the creator portal
+
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
   const [trusteeRows, setTrusteeRows] = useState([{ id: 1 }]);
-  const [token, setToken] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [tokenContractAddress, setTokenContractAddress] = useState("");
-  const [allowanceAmount, setAllowanceAmount] = useState("");
+  const [token, setToken] = useState('');
+  const [recipient, setRecipient] = useState('');
+  const [amount, setAmount] = useState('');
+  const [tokenContractAddress, setTokenContractAddress] = useState('');
+  const [allowanceAmount, setAllowanceAmount] = useState('');
   const [showAlert, setShowAlert] = useState(false); // Initialize showAlert state to false
   const {
     isConnected,
@@ -112,6 +137,12 @@ const AppHome = () => {
     contract,
     walletProvider,
   } = useContext(WalletContext);
+
+  const [selectedToken, setSelectedToken] = useState('');
+
+  const handleTokenChange = (e) => {
+    setSelectedToken(e.target.value);
+  };
 
   const [showModal, setShowModal] = useState(false); // For controlling the display of the modal
 
@@ -138,9 +169,9 @@ const AppHome = () => {
         ethers.parseEther(amount)
       );
       await tx.wait();
-      console.log("Allocation set successfully.");
+      console.log('Allocation set successfully.');
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
     }
   };
   const handleSubmit = async (event) => {
@@ -160,7 +191,7 @@ const AppHome = () => {
         ethers.parseEther(allowanceAmount)
       );
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
     }
   };
   /**
@@ -197,7 +228,7 @@ const AppHome = () => {
 
   useEffect(() => {
     if (isConnected && contract) {
-      console.log("We are connected to wallet");
+      console.log('We are connected to wallet');
       owner();
       console.log(userAccount);
     }
@@ -209,9 +240,9 @@ const AppHome = () => {
   }
 
   // The following code is for the beneficiary portal
-  const [creator, setCreator] = useState("");
-  const [withdrawalToken, setWithdrawalToken] = useState("");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [creator, setCreator] = useState('');
+  const [withdrawalToken, setWithdrawalToken] = useState('');
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const handleWithdrawSubmit = async (event) => {
     event.preventDefault();
 
@@ -224,62 +255,131 @@ const AppHome = () => {
 
       await tx.wait();
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error('An error occurred:', error);
+    }
+  };
+
+  const handleTokenSelect = (key) => {
+    const token = tokens.find((t) => t.symbol === key);
+    if (token) {
+      setTokenContractAddress(token.address);
+      setSelectedToken(token);
     }
   };
 
   return (
     <>
+      {/* <img
+        src='https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png'
+        alt='link'
+      ></img> */}
       <h3>Creator Portal</h3>
       {/*Here we set the allowance for the DecentraWill contract*/}
-      <h4 style={{ color: "#e056fd" }}>
+      <h4 style={{ color: '#e056fd' }}>
         How much token control to give DecentraWill?
       </h4>
       <Form onSubmit={handleAllowanceSubmit}>
         <Form.Group>
-          <Form.Label>Token Address</Form.Label>
-          <Form.Control
-            type="text"
-            value={tokenContractAddress}
-            onChange={(e) => setTokenContractAddress(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
-          />
+          <Form.Label>Token Contact Address</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type='text'
+              value={tokenContractAddress}
+              onChange={(e) => setTokenContractAddress(e.target.value)}
+              placeholder='Enter or select a token address'
+            />
+            <Dropdown onSelect={handleTokenSelect}>
+              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
+                {selectedToken ? selectedToken.symbol : 'Select Token'}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {tokens.map((token) => (
+                  <Dropdown.Item key={token.symbol} eventKey={token.symbol}>
+                    <img
+                      src={token.imageUrl}
+                      alt={token.symbol}
+                      style={{ width: 20, height: 20, marginRight: 10 }}
+                    />
+                    {token.symbol}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </InputGroup>
+          {selectedToken && ( // Show the selected token address if a token is selected
+            <Form.Text>
+              Selected Token Address: {selectedToken.address}
+            </Form.Text>
+          )}
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Allowance Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
-            placeholder="How many tokens should DecentraWill be able to access on your behalf?"
+            placeholder='Specify the number of tokens'
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allowance
         </Button>
       </Form>
       <br />
       {/*Here we set the allocation for the beneficiary*/}
-      <h4 style={{ color: "#e056fd" }}>
+      <h4 style={{ color: '#e056fd' }}>
         How much tokens should this beneficiary receive?
       </h4>
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type='text'
+              value={tokenContractAddress}
+              onChange={(e) => setTokenContractAddress(e.target.value)}
+              placeholder='Enter or select a token address'
+            />
+            <Dropdown onSelect={handleTokenSelect}>
+              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
+                {selectedToken ? selectedToken.symbol : 'Select Token'}
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {tokens.map((token) => (
+                  <Dropdown.Item key={token.symbol} eventKey={token.symbol}>
+                    <img
+                      src={token.imageUrl}
+                      alt={token.symbol}
+                      style={{ width: 20, height: 20, marginRight: 10 }}
+                    />
+                    {token.symbol}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </InputGroup>
+          {selectedToken && ( // Show the selected token address if a token is selected
+            <Form.Text>
+              Selected Token Address: {selectedToken.address}
+            </Form.Text>
+          )}
+        </Form.Group>
+        {/* <Form.Group>
+          <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
-        </Form.Group>
+        </Form.Group> */}
 
         <Form.Group>
           <Form.Label>Beneficiary Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Please specify the address of the will's beneficiary for token withdrawal. For multiple beneficiaries, you will have to set the allocation for each beneficiary separately."
@@ -289,14 +389,14 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Please specify the amount of tokens to allocate to this beneficiary."
+            placeholder='Please specify the amount of tokens to allocate to this beneficiary.'
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allocation
         </Button>
       </Form>
@@ -309,16 +409,16 @@ const AppHome = () => {
             if (userConfirmed) {
               proceedWithAllocation(); // Proceed only if user confirms
             } else {
-              console.log("User cancelled the operation.");
+              console.log('User cancelled the operation.');
             }
           }}
-          title="Confirm Allocation"
-          message="The allocation amount exceeds your balance. Do you want to proceed?"
+          title='Confirm Allocation'
+          message='The allocation amount exceeds your balance. Do you want to proceed?'
         />
       )}
 
       <br />
-      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <h4 style={{ color: '#e056fd' }}>Existing Wills</h4>
       <WillCards />
       <br />
       <h3>Beneficiary Portal</h3>
@@ -327,7 +427,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Creator Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={creator}
             onChange={(e) => setCreator(e.target.value)}
             placeholder="Please specify the will creator's wallet address."
@@ -337,29 +437,29 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(e.target.value)}
             placeholder="Please specify the amount of tokens you'd like to withdraw."
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Withdraw
         </Button>
       </Form>
       <br />
-      <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
+      <h4 style={{ color: '#e056fd' }}>Tokens allocated to you</h4>
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
