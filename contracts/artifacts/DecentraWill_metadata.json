@@ -11,26 +11,134 @@
 				"type": "constructor"
 			},
 			{
+				"inputs": [],
+				"name": "NoAllocationAvailable",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "RecipientNotFound",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "TransferFailed",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "Unauthorized",
+				"type": "error"
+			},
+			{
+				"anonymous": false,
 				"inputs": [
 					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"indexed": true,
 						"internalType": "address",
 						"name": "token",
 						"type": "address"
 					},
 					{
+						"indexed": true,
 						"internalType": "address",
 						"name": "recipient",
 						"type": "address"
 					},
 					{
+						"indexed": false,
 						"internalType": "uint256",
 						"name": "amount",
 						"type": "uint256"
 					}
 				],
-				"name": "adjustAllocation",
-				"outputs": [],
-				"stateMutability": "nonpayable",
+				"name": "AllocationSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					}
+				],
+				"name": "RecipientRemoved",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "beneficiary",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Withdrawal",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "creatorsForBeneficiary",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -231,7 +339,7 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "amount",
+						"name": "requestedAmount",
 						"type": "uint256"
 					}
 				],
@@ -243,25 +351,12 @@
 		],
 		"devdoc": {
 			"kind": "dev",
-			"methods": {
-				"withdrawTokenForBeneficiary(address,address,uint256)": {
-					"details": "Withdraws a specified amount of tokens for the beneficiary.",
-					"params": {
-						"amount": "The amount of tokens to be withdrawn.",
-						"creator": "The address of the will creator.",
-						"token": "The address of the token to be withdrawn."
-					}
-				}
-			},
+			"methods": {},
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {
-				"withdrawTokenForBeneficiary(address,address,uint256)": {
-					"notice": "This function can only be called by the beneficiary of the token allocation.The function checks if the beneficiary has sufficient allocation before transferring the tokens.The function decreases the allocation before transferring to prevent re-entrancy attacks.The function uses the ERC20 transferFrom function to transfer tokens.The function emits a Transfer event upon successful transfer."
-				}
-			},
+			"methods": {},
 			"version": 1
 		}
 	},
@@ -290,11 +385,11 @@
 			]
 		},
 		"contracts/DecentraWill.sol": {
-			"keccak256": "0xa5caceffb52c3c85a81df9cbd755c13da8d9e4bc24b9537c9c4da6f73306e0d0",
+			"keccak256": "0x1086834dc87e546721e113e399ec23a0e2a8082cff28c8c98a21d7d751aa82cd",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://a939ca87ff2b48a036c2131403c25063a40238f283bab32b5876fa222f2af2a8",
-				"dweb:/ipfs/QmfYoJWh1Riwu8uWLjtSvvrNtc93etzX8cczrDfgucyyW5"
+				"bzz-raw://ca539a6d0a490aa0438ed69cf2ae48c7df64fca6fa16acfc0f4c96fc2fd8740c",
+				"dweb:/ipfs/QmNqCQxDyuugydQRqKzi6eFzyHW9UXRxWKsiGGy9mE2zvf"
 			]
 		}
 	},

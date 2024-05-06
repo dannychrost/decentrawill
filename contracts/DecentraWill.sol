@@ -4,23 +4,61 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DecentraWill {
     address public owner;
+    // Events
+    event AllocationSet(
+        address indexed user,
+        address indexed token,
+        address indexed recipient,
+        uint256 amount
+    );
+    event RecipientRemoved(
+        address indexed user,
+        address indexed token,
+        address indexed recipient
+    );
+    event Withdrawal(
+        address indexed creator,
+        address indexed token,
+        address indexed beneficiary,
+        uint256 amount
+    );
+
+    // Errors
+    error Unauthorized(); // No additional data needed
+    error RecipientNotFound(); // When a specific recipient cannot be found
+    error NoAllocationAvailable(); // When there is no allocation available for a withdrawal
+    error TransferFailed(); // If the ERC20 token transfer fails
+    error InvalidDeadline(); // When the new deadline is not in the future
+    error DeadlineNotMet(); // When the deadline has not yet been met for withdrawal
 
     constructor() {
         owner = msg.sender;
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
+        if (msg.sender != owner) {
+            revert Unauthorized();
+        }
         _;
     }
+
     // Nested mapping remains to store the actual allocations.
     // tokenAllocations[userAddress][tokenAddress][recipientAddress] = amount
     mapping(address => mapping(address => mapping(address => uint256)))
         public tokenAllocations;
 
+    // Mapping from creator to deadline timestamp
+    mapping(address => uint256) public creatorDeadlines;
+
     // Arrays to keep track of which tokens each user has allocated and to whom.
+    // Creator => Tokens
     mapping(address => address[]) private userAllocatedTokens;
+    // Creator => Token => Recipients
     mapping(address => mapping(address => address[])) private tokenRecipients;
+
+    // Mapping to keep track of the creators that have allocated tokens to a beneficiary.
+    // Beneficiary => Creators
+    mapping(address => address[]) public creatorsForBeneficiary;
 
     // Helper function to add a token to the user's allocated list if it's not already there.
     function _addTokenForUser(address user, address token) private {
@@ -67,15 +105,45 @@ contract DecentraWill {
         return false;
     }
 
+    // Helper function to add a creator for a beneficiary if not already there
+    function _addCreatorForBeneficiary(
+        address creator,
+        address beneficiary
+    ) private {
+        bool creatorExists = false;
+        for (uint i = 0; i < creatorsForBeneficiary[beneficiary].length; i++) {
+            if (creatorsForBeneficiary[beneficiary][i] == creator) {
+                creatorExists = true;
+                break;
+            }
+        }
+        if (!creatorExists) {
+            creatorsForBeneficiary[beneficiary].push(creator);
+        }
+    }
+
     // Public function to set allocations, with added logic to track tokens and recipients.
     function setAllocation(
         address token,
         address recipient,
         uint256 amount
     ) public {
-        tokenAllocations[msg.sender][token][recipient] = amount;
-        _addTokenForUser(msg.sender, token);
-        _addRecipientForToken(msg.sender, token, recipient);
+        if (amount == 0) {
+            // Attempt to remove the recipient if the allocation amount is zero.
+            // This call will also handle removing the user from creators list if no other allocations exist.
+            removeRecipientForToken(msg.sender, token, recipient);
+        } else {
+            // Set or update the allocation amount
+            tokenAllocations[msg.sender][token][recipient] = amount;
+
+            // Add token to user's allocated tokens list if not already there
+            _addTokenForUser(msg.sender, token);
+            // Add recipient to the token's recipient list if not already there
+            _addRecipientForToken(msg.sender, token, recipient);
+            // Add creator for beneficiary mapping if not already there
+            _addCreatorForBeneficiary(msg.sender, recipient);
+            emit AllocationSet(msg.sender, token, recipient, amount); // Emit event when allocation is set
+        }
     }
 
     // Function to get a list of tokens allocated by a user.
@@ -98,18 +166,18 @@ contract DecentraWill {
         address user,
         address token,
         address recipient
-    ) public onlyOwner {
-        require(
-            isRecipientOfToken(user, token, recipient),
-            "Recipient not found"
-        );
+    ) public {
+        if (!isRecipientOfToken(user, token, recipient)) {
+            revert RecipientNotFound();
+        }
+
+        // Find and remove the recipient from the recipients list
         uint256 index;
         for (index = 0; index < tokenRecipients[user][token].length; index++) {
             if (tokenRecipients[user][token][index] == recipient) {
                 break;
             }
         }
-        // Remove recipient from the array
         for (
             uint256 i = index;
             i < tokenRecipients[user][token].length - 1;
@@ -121,52 +189,104 @@ contract DecentraWill {
         }
         tokenRecipients[user][token].pop();
 
-        // Remove the allocation
+        // Remove the token allocation for the recipient
         delete tokenAllocations[user][token][recipient];
-    }
 
-    // Adjust the allocated amount for a recipient or remove it if the amount is zero
-    function adjustAllocation(
-        address token,
-        address recipient,
-        uint256 amount
-    ) public {
-        if (amount == 0) {
-            delete tokenAllocations[msg.sender][token][recipient];
-            // Consideration: Additional logic to clean up userAllocatedTokens and tokenRecipients if needed
-        } else {
-            tokenAllocations[msg.sender][token][recipient] = amount;
+        // Check if there are no more recipients for this token
+        if (tokenRecipients[user][token].length == 0) {
+            // Find and remove the token from userAllocatedTokens if no recipients are left
+            for (index = 0; index < userAllocatedTokens[user].length; index++) {
+                if (userAllocatedTokens[user][index] == token) {
+                    for (
+                        uint256 i = index;
+                        i < userAllocatedTokens[user].length - 1;
+                        i++
+                    ) {
+                        userAllocatedTokens[user][i] = userAllocatedTokens[
+                            user
+                        ][i + 1];
+                    }
+                    userAllocatedTokens[user].pop();
+                    break;
+                }
+            }
         }
+        // Check if the user has any other tokens allocated to the recipient
+        bool hasOtherAllocations = false;
+        address[] memory allocatedTokens = userAllocatedTokens[user];
+        for (uint i = 0; i < allocatedTokens.length; i++) {
+            if (tokenAllocations[user][allocatedTokens[i]][recipient] > 0) {
+                hasOtherAllocations = true;
+                break;
+            }
+        }
+
+        // If no other allocations exist, remove the user from the recipient's creators list
+        if (!hasOtherAllocations) {
+            address[] storage creatorsList = creatorsForBeneficiary[recipient];
+            for (uint i = 0; i < creatorsList.length; i++) {
+                if (creatorsList[i] == user) {
+                    for (uint j = i; j < creatorsList.length - 1; j++) {
+                        creatorsList[j] = creatorsList[j + 1];
+                    }
+                    creatorsList.pop();
+                    break;
+                }
+            }
+        }
+
+        emit RecipientRemoved(user, token, recipient); // Emit event when a recipient is removed
     }
 
-    /**
-     * @dev Withdraws a specified amount of tokens for the beneficiary.
-     * @param creator The address of the will creator.
-     * @param token The address of the token to be withdrawn.
-     * @param amount The amount of tokens to be withdrawn.
-     * @notice This function can only be called by the beneficiary of the token allocation.
-     * @notice The function checks if the beneficiary has sufficient allocation before transferring the tokens.
-     * @notice The function decreases the allocation before transferring to prevent re-entrancy attacks.
-     * @notice The function uses the ERC20 transferFrom function to transfer tokens.
-     * @notice The function emits a Transfer event upon successful transfer.
-     */
     function withdrawTokenForBeneficiary(
         address creator,
         address token,
-        uint256 amount
+        uint256 requestedAmount
     ) public {
-        require(
-            tokenAllocations[creator][token][msg.sender] >= amount,
-            "Insufficient allocation"
-        );
+        if (!isRecipientOfToken(creator, token, msg.sender)) {
+            revert RecipientNotFound();
+        }
+
+        uint256 allocation = tokenAllocations[creator][token][msg.sender];
+        if (allocation == 0) {
+            revert NoAllocationAvailable();
+        }
+
+        // Ensure a deadline is set and has passed
+        uint256 deadline = creatorDeadlines[creator];
+        if (deadline == 0 || block.timestamp < deadline) {
+            revert DeadlineNotMet();
+        }
+
+        uint256 withdrawalAmount = (requestedAmount > allocation)
+            ? allocation
+            : requestedAmount;
 
         // Decrease the allocation before transferring to prevent re-entrancy attacks
-        tokenAllocations[creator][token][msg.sender] -= amount;
+        tokenAllocations[creator][token][msg.sender] -= withdrawalAmount;
 
         // Transfer the tokens from the will creator's account to the beneficiary
-        require(
-            IERC20(token).transferFrom(creator, msg.sender, amount),
-            "Transfer failed"
+        bool success = IERC20(token).transferFrom(
+            creator,
+            msg.sender,
+            withdrawalAmount
         );
+        if (!success) {
+            revert TransferFailed();
+        }
+
+        emit Withdrawal(creator, token, msg.sender, withdrawalAmount);
+
+        // Cleanup if all tokens are withdrawn
+        if (tokenAllocations[creator][token][msg.sender] == 0) {
+            removeRecipientForToken(creator, token, msg.sender);
+        }
+    }
+
+    function setCreatorDeadline(uint256 newDeadline) public {
+        if (newDeadline <= block.timestamp) {
+            revert InvalidDeadline();
+        }
+        creatorDeadlines[msg.sender] = newDeadline;
     }
 }
