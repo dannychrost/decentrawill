@@ -28,7 +28,28 @@ function CustomAlert({ show, onClose, title, message }) {
     </Modal>
   );
 }
+function unixToEasternTime(unixTimestamp) {
+  // Create a new Date object from the UNIX timestamp
+  // UNIX timestamp is expected to be in seconds, JavaScript Date expects milliseconds
+  if (unixTimestamp == 0) return 0;
+  const date = new Date(unixTimestamp * 1000);
 
+  // Format options to display the date as a string
+  const options = {
+    weekday: "long", // e.g., Monday
+    year: "numeric", // e.g., 2021
+    month: "long", // e.g., July
+    day: "numeric", // e.g., 31
+    hour: "2-digit", // e.g., 02
+    minute: "2-digit", // e.g., 59
+    second: "2-digit", // e.g., 59
+    timeZone: "America/New_York", // Set timezone to Eastern Time
+    timeZoneName: "short", // Display short timezone name e.g., EST
+  };
+
+  // Convert to locale string with specified options
+  return date.toLocaleString("en-US", options);
+}
 const WillCards = () => {
   const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
   const { contract, userAccount } = useContext(WalletContext);
@@ -47,6 +68,7 @@ const WillCards = () => {
             userAccount,
             token
           );
+          const tempDeadline = await contract.creatorDeadlines(userAccount);
           const details = await Promise.all(
             recipients.map(async (recipient) => {
               const amount = await contract.tokenAllocations(
@@ -58,6 +80,9 @@ const WillCards = () => {
                 token,
                 recipient,
                 amount: ethers.formatEther(amount), // Ensuring proper use of ethers formatting
+                creatorDeadline: unixToEasternTime(
+                  ethers.formatUnits(tempDeadline, "wei")
+                ),
               };
             })
           );
@@ -87,6 +112,12 @@ const WillCards = () => {
               <Card.Text>{alloc.token}</Card.Text>
               <Card.Subtitle>Amount:</Card.Subtitle>
               <Card.Text>{alloc.amount} Tokens</Card.Text>
+              <Card.Subtitle>Deadline: </Card.Subtitle>
+              <Card.Text>
+                {alloc.creatorDeadline == 0
+                  ? "Not set yet"
+                  : alloc.creatorDeadline}
+              </Card.Text>
             </Card.Body>
           </Card>
         </Col>
@@ -141,11 +172,16 @@ const BeneficiaryWills = () => {
             );*/
             //const balance = await tokenContract.symbol();
             //console.log(balance);
+            const tempDeadline = await contract.creatorDeadlines(creator);
+
             if (amount > 0) {
               willsData.push({
                 creator: creator,
                 token: token,
                 amount: ethers.formatEther(amount), // Convert amount from Wei to Ether
+                creatorDeadline: unixToEasternTime(
+                  ethers.formatUnits(tempDeadline, "wei")
+                ),
               });
             }
           }
@@ -167,11 +203,17 @@ const BeneficiaryWills = () => {
           <Card>
             <Card.Header as="h5">Will Details</Card.Header>
             <Card.Body>
-              <Card.Title>Token: {will.token}</Card.Title>
+              <Card.Subtitle>Token Address: </Card.Subtitle>
+              <Card.Text>{will.token} </Card.Text>
+              <Card.Subtitle>Creator Address: </Card.Subtitle>
+              <Card.Text>{will.creator} </Card.Text>
+              <Card.Subtitle>Amount: </Card.Subtitle>
+              <Card.Text>{will.amount} Tokens</Card.Text>
+              <Card.Subtitle>Deadline: </Card.Subtitle>
               <Card.Text>
-                Creator: {will.creator}
-                <br />
-                Amount: {will.amount} Tokens
+                {will.creatorDeadline == 0
+                  ? "Not set yet"
+                  : will.creatorDeadline}
               </Card.Text>
             </Card.Body>
           </Card>
@@ -310,9 +352,39 @@ const AppHome = () => {
 
       await tx.wait();
     } catch (error) {
-      console.error("An error occurred:", error);
+      let tempDeadline = await contract.creatorDeadlines(creator);
+      tempDeadline = ethers.formatUnits(tempDeadline, "wei");
+      tempDeadline = parseInt(tempDeadline);
+
+      if (tempDeadline == 0) {
+        alert("The creator has not set a deadline for the withdrawal yet.");
+      } else if (tempDeadline > Math.floor(Date.now() / 1000)) {
+        alert("You may not withdraw yet.");
+      } else {
+        console.error("An error occurred:", error);
+      }
     }
   };
+  const [deadline, setDeadline] = useState("");
+  async function setDeadlineHandler(event) {
+    event.preventDefault();
+
+    if (!deadline) {
+      alert("Please select a valid date and time for the deadline.");
+      return;
+    }
+
+    const timestamp = Math.floor(new Date(deadline).getTime() / 1000); // Convert date to UNIX timestamp
+    try {
+      const tx = await contract.setCreatorDeadline(timestamp);
+      await tx.wait(); // Wait for the transaction to be mined
+      console.log("Deadline set successfully.");
+      alert("Deadline has been successfully set.");
+    } catch (error) {
+      console.error("Failed to set deadline:", error);
+      alert("Error setting deadline: " + error.message);
+    }
+  }
 
   return (
     <>
@@ -386,7 +458,25 @@ const AppHome = () => {
           Set Allocation
         </Button>
       </Form>
-
+      <br />
+      <h4 style={{ color: "#e056fd" }}>
+        At what point should beneficiaries be able to withdraw their tokens?
+      </h4>
+      {/* The following code is for setting the deadline */}
+      <Form onSubmit={setDeadlineHandler}>
+        <Form.Group>
+          <Form.Label>Date and Time</Form.Label>
+          <Form.Control
+            type="datetime-local"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            placeholder="Select date and time"
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Set Deadline
+        </Button>
+      </Form>
       {showModal && (
         <CustomAlert
           show={showModal}
