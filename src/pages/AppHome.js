@@ -592,12 +592,13 @@ const AppHome = () => {
           message="The allocation amount exceeds your balance. Do you want to proceed?"
         />
       )}
-
+      {/* ----------------------commented out below ----------------------------*/}
+      {/* seperating creator and beneficiary portal */}
       <br />
-      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
-      <WillCards />
+      {/* <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <WillCards /> */}
       <br />
-      <h3>Beneficiary Portal</h3>
+      {/* <h3>Beneficiary Portal</h3>
 
       <Form onSubmit={handleWithdrawSubmit}>
         <Form.Group>
@@ -633,10 +634,10 @@ const AppHome = () => {
         <Button variant="primary" type="submit">
           Withdraw
         </Button>
-      </Form>
+      </Form> */}
       <br />
-      <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
-      <BeneficiaryWills />
+      {/* <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
+      <BeneficiaryWills /> */}
       {/*<Form>
         <Form.Group className="mb-3 text-center" controlId="testamentName">
           <Form.Label>Testament Name</Form.Label>
