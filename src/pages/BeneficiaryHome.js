@@ -247,8 +247,8 @@ const BeneficiaryWills = () => {
   );
 };
 
-const AppHome = () => {
-  // The following code is for the creator portal
+const BeneficiaryHome = () => {
+  // The following code is for the beneficiary portal
 
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
   const [trusteeRows, setTrusteeRows] = useState([{ id: 1 }]);
@@ -427,184 +427,17 @@ const AppHome = () => {
 
   return (
     <>
-      {/* <img
-        src='https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png'
-        alt='link'
-      ></img> */}
-      <h3>Creator Portal</h3>
-      {/*Here we set the allowance for the DecentraWill contract*/}
-      <h4 style={{ color: '#e056fd' }}>
-        How much token control to give DecentraWill?
-      </h4>
-      <Form onSubmit={handleAllowanceSubmit}>
-        <Form.Group>
-          <Form.Label>Token Contact Address</Form.Label>
-          <InputGroup>
-            <Form.Control
-              type='text'
-              value={tokenContractAddress}
-              onChange={(e) => setTokenContractAddress(e.target.value)}
-              placeholder='Enter or select a token address'
-            />
-            <Dropdown onSelect={handleTokenSelect}>
-              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
-                {selectedToken ? selectedToken.symbol : 'Select Token'}
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {tokens.map((token) => (
-                  <Dropdown.Item key={token.symbol} eventKey={token.symbol}>
-                    <img
-                      src={token.imageUrl}
-                      alt={token.symbol}
-                      style={{ width: 20, height: 20, marginRight: 10 }}
-                    />
-                    {token.symbol}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </InputGroup>
-          {selectedToken && ( // Show the selected token address if a token is selected
-            <Form.Text>
-              Selected Token Address: {selectedToken.address}
-            </Form.Text>
-          )}
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>Allowance Amount</Form.Label>
-          <Form.Control
-            type='number'
-            value={allowanceAmount}
-            onChange={(e) => setAllowanceAmount(e.target.value)}
-            placeholder='Specify the number of tokens'
-          />
-        </Form.Group>
-
-        <Button variant='primary' type='submit'>
-          Set Allowance
-        </Button>
-      </Form>
       <br />
-      {/*Here we set the allocation for the beneficiary*/}
-      <h4 style={{ color: '#e056fd' }}>
-        How much tokens should this beneficiary receive?
-      </h4>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group>
-          <Form.Label>Token Address</Form.Label>
-          <InputGroup>
-            <Form.Control
-              type='text'
-              value={tokenContractAddress}
-              onChange={(e) => setTokenContractAddress(e.target.value)}
-              placeholder='Enter or select a token address'
-            />
-            <Dropdown onSelect={handleTokenSelect}>
-              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
-                {selectedToken ? selectedToken.symbol : 'Select Token'}
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {tokens.map((token) => (
-                  <Dropdown.Item key={token.symbol} eventKey={token.symbol}>
-                    <img
-                      src={token.imageUrl}
-                      alt={token.symbol}
-                      style={{ width: 20, height: 20, marginRight: 10 }}
-                    />
-                    {token.symbol}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </InputGroup>
-          {selectedToken && ( // Show the selected token address if a token is selected
-            <Form.Text>
-              Selected Token Address: {selectedToken.address}
-            </Form.Text>
-          )}
-        </Form.Group>
-        {/* <Form.Group>
-          <Form.Label>Token Address</Form.Label>
-          <Form.Control
-            type='text'
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
-          />
-        </Form.Group> */}
-
-        <Form.Group>
-          <Form.Label>Beneficiary Address</Form.Label>
-          <Form.Control
-            type='text'
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            placeholder="Please specify the address of the will's beneficiary for token withdrawal. For multiple beneficiaries, you will have to set the allocation for each beneficiary separately."
-          />
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>Amount</Form.Label>
-          <Form.Control
-            type='number'
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder='Please specify the amount of tokens to allocate to this beneficiary.'
-          />
-        </Form.Group>
-
-        <Button variant='primary' type='submit'>
-          Set Allocation
-        </Button>
-      </Form>
+      <h4 style={{ color: '#e056fd' }}>Existing Wills</h4>
+      <WillCards />
       <br />
-      <h4 style={{ color: '#e056fd' }}>
-        At what point should beneficiaries be able to withdraw their tokens?
-      </h4>
-      {/* The following code is for setting the deadline */}
-      <Form onSubmit={setDeadlineHandler}>
-        <Form.Group>
-          <Form.Label>Date and Time</Form.Label>
-          <Form.Control
-            type='datetime-local'
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            placeholder='Select date and time'
-          />
-        </Form.Group>
-        <Button variant='primary' type='submit'>
-          Set Deadline
-        </Button>
-      </Form>
-      {showModal && (
-        <CustomAlert
-          show={showModal}
-          onClose={(userConfirmed) => {
-            setShowModal(false); // Always close the modal
-            if (userConfirmed) {
-              proceedWithAllocation(); // Proceed only if user confirms
-            } else {
-              console.log('User cancelled the operation.');
-            }
-          }}
-          title='Confirm Allocation'
-          message='The allocation amount exceeds your balance. Do you want to proceed?'
-        />
-      )}
-      {/* ----------------------commented out below ----------------------------*/}
-      {/* seperating creator and beneficiary portal */}
-      <br />
-      {/* <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
-      <WillCards /> */}
-      <br />
-      {/* <h3>Beneficiary Portal</h3>
+      <h3>Beneficiary Portal</h3>
 
       <Form onSubmit={handleWithdrawSubmit}>
         <Form.Group>
           <Form.Label>Creator Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={creator}
             onChange={(e) => setCreator(e.target.value)}
             placeholder="Please specify the will creator's wallet address."
@@ -614,135 +447,32 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Token Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={withdrawalToken}
             onChange={(e) => setWithdrawalToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
+            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
           />
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={withdrawalAmount}
             onChange={(e) => setWithdrawalAmount(e.target.value)}
             placeholder="Please specify the amount of tokens you'd like to withdraw."
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Withdraw
         </Button>
-      </Form> */}
+      </Form>
       <br />
-      {/* <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
-      <BeneficiaryWills /> */}
-      {/*<Form>
-        <Form.Group className="mb-3 text-center" controlId="testamentName">
-          <Form.Label>Testament Name</Form.Label>
-          <Row className="justify-content-center">
-            <Col xs={5}>
-              <Form.Control type="email" placeholder="Enter Testament name" />
-            </Col>
-          </Row>
-        </Form.Group>
-
-        <Form.Group className="mb-3 text-center" controlId="successor">
-          <Form.Label>Enter Successor</Form.Label>
-          <Row className="justify-content-center">
-            <Form.Text className="text-primary">Min 1, Max 3</Form.Text>
-          </Row>
-          {successorRows.map((row) => (
-            <React.Fragment key={row.id}>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control placeholder="Successor" />
-                </Col>
-              </Row>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control type="email" placeholder="Successor Email" />
-                </Col>
-              </Row>
-            </React.Fragment>
-          ))}
-          {successorRows.length < 3 && (
-            <Row className="justify-content-center">
-              <Button variant="primary" onClick={addSuccessorRow}>
-                Add Successor
-              </Button>
-            </Row>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3 text-center" controlId="trustee">
-          <Form.Label>Enter Trustee</Form.Label>
-          <Row className="justify-content-center">
-            <Form.Text className="text-primary">Min 1, Max 3</Form.Text>
-          </Row>
-          {trusteeRows.map((row) => (
-            <React.Fragment key={row.id}>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control placeholder="Trustee" />
-                </Col>
-              </Row>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control type="email" placeholder="Trustee Email" />
-                </Col>
-              </Row>
-            </React.Fragment>
-          ))}
-          {trusteeRows.length < 3 && (
-            <Row className="justify-content-center">
-              <Button variant="primary" onClick={addTrusteeRow}>
-                Add Trustee
-              </Button>
-            </Row>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="testamentName">
-          <Form.Label>Set Up A Quorum</Form.Label>
-          <Row>
-            <Col sm={2}>
-              <InputGroup size="sm" className="mb-3">
-                <InputGroup.Text id="inputGroup-sizing-sm">#</InputGroup.Text>
-                <Form.Control
-                  type="email"
-                  aria-label="Small"
-                  aria-describedby="inputGroup-sizing-sm"
-                />
-              </InputGroup>
-            </Col>
-            <Form.Text className="text-primary">
-              At least one trustee. Max 2.
-            </Form.Text>
-          </Row>
-        </Form.Group>
-
-        <Dropdown>
-          <Dropdown.Toggle variant="success" id="dropdown-basic">
-            Select Tokens from List
-          </Dropdown.Toggle>
-
-          <Dropdown.Menu>
-            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-
-        <Row className="justify-content-center">
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
-        </Row>
-          </Form>*/}
+      <h4 style={{ color: '#e056fd' }}>Tokens allocated to you</h4>
+      <BeneficiaryWills />
     </>
   );
 };
 
-export default AppHome;
+export default BeneficiaryHome;
