@@ -37,14 +37,6 @@ function MainNavbar() {
                 <div>
                   <button
                     onClick={() => {
-                      navigate("/Home2");
-                    }}
-                    className="text-sm text-blue-600 underline"
-                  >
-                    Enter Application
-                  </button>
-                  <button
-                    onClick={() => {
                       doSignOut().then(() => {
                         navigate("/");
                       });
