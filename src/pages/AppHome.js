@@ -90,16 +90,19 @@ const WillCards = ({ refreshCounter }) => {
   const [allowances, setAllowances] = useState([]); // Holds allowances data
   useEffect(() => {
     const fetchWills = async () => {
-      if (!userAccount || !isConnected) {
+      if (!userAccount || !isConnected || !contract) {
         setAllocations([]); // Reset the allocations state
         setAllowances([]); // Reset the allowances state
         return;
       } // Ensure userAccount is available
       const tokens = await contract.getAllocatedTokensByUser(userAccount);
+
       for (let a = 0; a < tokens.length; a++) {
         console.log(tokens[a]);
       }
-
+      if (tokens.length == 0) {
+        return;
+      }
       const userAllocations = await Promise.all(
         tokens.map(async (token) => {
           const recipients = await contract.getRecipientsByToken(
@@ -265,7 +268,6 @@ const AppHome = () => {
     console.log(`Token: ${tokenContractAddress}`);
     const tokenContract = new ethers.Contract(
       tokenContractAddress,
-      tokenContractAddress,
       IERC20Abi.abi,
       await walletProvider.getSigner()
     );
@@ -317,7 +319,6 @@ const AppHome = () => {
       //removeListener = AllocationListener();
 
       const tx = await contract.setAllocation(
-        tokenContractAddress,
         tokenContractAddress,
         recipient,
         ethers.parseEther(amount)
