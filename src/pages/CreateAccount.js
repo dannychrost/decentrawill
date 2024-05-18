@@ -14,7 +14,7 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import React from "react";
-import { Nav } from "react-bootstrap";
+import { Nav, Card, Container } from "react-bootstrap";
 import SignIn from ".//SignIn";
 import "../firebase/Firebase";
 import "firebase/auth";
@@ -121,6 +121,61 @@ const CreateAccount = () => {
   };
   return (
     <>
+      <Container className="d-flex justify-content-center align-items-center vh-80">
+        <Card style={{ width: "24rem" }}>
+          <Card.Body>
+            <Card.Title>Create Account</Card.Title>
+            <Form onSubmit={handleRegistration}>
+              <Form.Group className="mb-3" controlId="formGridEmail">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formGridPassword">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isRegistering}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formGridConfirmPassword">
+                <Form.Label>Confirm Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isRegistering}
+                />
+              </Form.Group>
+
+              {errorMessage && (
+                <div className="mb-3 text-danger">{errorMessage}</div>
+              )}
+
+              <Button variant="primary" type="submit" disabled={isRegistering}>
+                {isRegistering ? "Signing Up..." : "Create Account"}
+              </Button>
+            </Form>
+            <Card.Text className="mt-3 text-center">
+              Already have an account? <Link to="/signIn">Sign in</Link>
+            </Card.Text>
+          </Card.Body>
+        </Card>
+      </Container>
+      {/*
       <Form onSubmit={handleRegistration}>
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridEmail">
@@ -169,7 +224,7 @@ const CreateAccount = () => {
 
       <Nav>
         <Nav.Link href="/signIn">Already Have an Account</Nav.Link>
-      </Nav>
+      </Nav>*/}
     </>
   );
 };
