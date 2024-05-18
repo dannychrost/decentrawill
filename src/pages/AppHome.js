@@ -265,6 +265,7 @@ const AppHome = () => {
     console.log(`Token: ${tokenContractAddress}`);
     const tokenContract = new ethers.Contract(
       tokenContractAddress,
+      tokenContractAddress,
       IERC20Abi.abi,
       await walletProvider.getSigner()
     );
@@ -316,6 +317,7 @@ const AppHome = () => {
       //removeListener = AllocationListener();
 
       const tx = await contract.setAllocation(
+        tokenContractAddress,
         tokenContractAddress,
         recipient,
         ethers.parseEther(amount)
@@ -684,14 +686,14 @@ const AppHome = () => {
           <Form.Label>Token Contact Address</Form.Label>
           <InputGroup>
             <Form.Control
-              type="text"
+              type='text'
               value={tokenContractAddress}
               onChange={(e) => setTokenContractAddress(e.target.value)}
-              placeholder="Enter or select a token address"
+              placeholder='Enter or select a token address'
             />
             <Dropdown onSelect={handleTokenSelect}>
-              <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                {selectedToken ? selectedToken.symbol : "Select Token"}
+              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
+                {selectedToken ? selectedToken.symbol : 'Select Token'}
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {tokens.map((token) => (
@@ -717,14 +719,14 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Allowance Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={allowanceAmount}
             onChange={(e) => setAllowanceAmount(e.target.value)}
-            placeholder="Specify the number of tokens"
+            placeholder='Specify the number of tokens'
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allowance
         </Button>
       </Form>
@@ -738,14 +740,14 @@ const AppHome = () => {
           <Form.Label>Token Address</Form.Label>
           <InputGroup>
             <Form.Control
-              type="text"
+              type='text'
               value={tokenContractAddress}
               onChange={(e) => setTokenContractAddress(e.target.value)}
-              placeholder="Enter or select a token address"
+              placeholder='Enter or select a token address'
             />
             <Dropdown onSelect={handleTokenSelect}>
-              <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                {selectedToken ? selectedToken.symbol : "Select Token"}
+              <Dropdown.Toggle variant='outline-secondary' id='dropdown-basic'>
+                {selectedToken ? selectedToken.symbol : 'Select Token'}
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {tokens.map((token) => (
@@ -771,7 +773,7 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Beneficiary Address</Form.Label>
           <Form.Control
-            type="text"
+            type='text'
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Please specify the address of the will's beneficiary for token withdrawal. For multiple beneficiaries, you will have to set the allocation for each beneficiary separately."
@@ -781,19 +783,19 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Amount</Form.Label>
           <Form.Control
-            type="number"
+            type='number'
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Please specify the amount of tokens to allocate to this beneficiary."
+            placeholder='Please specify the amount of tokens to allocate to this beneficiary.'
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Allocation
         </Button>
       </Form>
       <br />
-      <h4 style={{ color: "#e056fd" }}>
+      <h4 style={{ color: '#e056fd' }}>
         At what point should beneficiaries be able to withdraw their tokens?
       </h4>
       
@@ -801,13 +803,13 @@ const AppHome = () => {
         <Form.Group>
           <Form.Label>Date and Time</Form.Label>
           <Form.Control
-            type="datetime-local"
+            type='datetime-local'
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            placeholder="Select date and time"
+            placeholder='Select date and time'
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
+        <Button variant='primary' type='submit'>
           Set Deadline
         </Button>
       </Form>
@@ -819,11 +821,11 @@ const AppHome = () => {
             if (userConfirmed) {
               proceedWithAllocation(); // Proceed only if user confirms
             } else {
-              console.log("User cancelled the operation.");
+              console.log('User cancelled the operation.');
             }
           }}
-          title="Confirm Allocation"
-          message="The allocation amount exceeds your balance. Do you want to proceed?"
+          title='Confirm Allocation'
+          message='The allocation amount exceeds your balance. Do you want to proceed?'
         />
       )}
       <br />
