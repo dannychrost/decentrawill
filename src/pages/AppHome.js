@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { Form, Button, Col, Row, Card, InputGroup } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Col,
+  Row,
+  Card,
+  InputGroup,
+  Table,
+} from "react-bootstrap";
 
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Container } from "react-bootstrap";
 import { DropdownButton } from "react-bootstrap";
 import { useEffect, useContext } from "react";
 import { WalletContext, WalletProvider } from "../contexts/WalletContext";
@@ -74,13 +82,19 @@ function unixToEasternTime(unixTimestamp) {
   // Convert to locale string with specified options
   return date.toLocaleString("en-US", options);
 }
-const WillCards = () => {
-  const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
-  const { contract, userAccount } = useContext(WalletContext);
 
+const WillCards = ({ refreshCounter }) => {
+  const [allocations, setAllocations] = useState([]); // State to hold allocations for the user
+  const { contract, userAccount, walletProvider, isConnected } =
+    useContext(WalletContext);
+  const [allowances, setAllowances] = useState([]); // Holds allowances data
   useEffect(() => {
     const fetchWills = async () => {
-      if (!userAccount) return; // Ensure userAccount is available
+      if (!userAccount || !isConnected) {
+        setAllocations([]); // Reset the allocations state
+        setAllowances([]); // Reset the allowances state
+        return;
+      } // Ensure userAccount is available
       const tokens = await contract.getAllocatedTokensByUser(userAccount);
       for (let a = 0; a < tokens.length; a++) {
         console.log(tokens[a]);
@@ -114,136 +128,109 @@ const WillCards = () => {
         })
       );
       setAllocations(userAllocations.flat()); // Set the allocations state
+      fetchAllowances(tokens); // Fetch allowances for these tokens
     };
 
-    if (contract && userAccount) {
-      console.log("Fetching wills");
-      fetchWills();
+    console.log("Fetching wills");
+    fetchWills();
+  }, [contract, userAccount, refreshCounter, isConnected]); // Depend on contract and userAccount to refresh data
+  const fetchAllowances = async (tokenAddresses) => {
+    try {
+      const allowancesPromises = tokenAddresses.map(async (address) => {
+        const tokenContract = new ethers.Contract(
+          address,
+          IERC20Abi.abi,
+          await walletProvider.getSigner()
+        );
+        console.log("Fetching allowance for token:", address);
+        const allowance = await tokenContract.allowance(
+          userAccount,
+          dwArtifact.address
+        );
+        console.log("Allowance:", ethers.formatEther(allowance));
+        return {
+          tokenAddress: address,
+          allowance: ethers.formatEther(allowance),
+        };
+      });
+      const results = await Promise.all(allowancesPromises);
+      setAllowances(results);
+    } catch (error) {
+      console.error("Error fetching allowances:", error);
     }
-  }, [contract, userAccount]); // Depend on contract and userAccount to refresh data
-
+  };
   return (
-    <Row xs={1} md={3} className="g-4">
-      {allocations.map((alloc, idx) => (
-        <Col key={idx}>
-          <Card>
-            <Card.Header as="h5">
-              Beneficiary:<Card.Subtitle> {alloc.recipient}</Card.Subtitle>
-            </Card.Header>
+    <div>
+      <br />
+      <Card className="mb-4">
+        <Card.Body>
+          <Card.Title className="text-center mb-3">
+            Allocations Created
+          </Card.Title>
+          {allocations.length > 0 ? (
+            <Row xs={1} md={3} className="g-4">
+              {allocations.map((alloc, idx) => (
+                <Col key={idx}>
+                  <Card>
+                    <Card.Header as="h5" className="text-center">
+                      Beneficiary:{" "}
+                      <Card.Subtitle>{alloc.recipient}</Card.Subtitle>
+                    </Card.Header>
+                    <Card.Body>
+                      <Card.Subtitle>Token:</Card.Subtitle>
+                      <Card.Text>{alloc.token}</Card.Text>
+                      <Card.Subtitle>Amount:</Card.Subtitle>
+                      <Card.Text>{alloc.amount} Tokens</Card.Text>
+                      <Card.Subtitle>Deadline:</Card.Subtitle>
+                      <Card.Text>
+                        {alloc.creatorDeadline === 0
+                          ? "Not set yet"
+                          : alloc.creatorDeadline}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <div className="alert alert-info" role="alert">
+              You have not created any wills yet.
+            </div>
+          )}
+        </Card.Body>
+      </Card>
 
-            <Card.Body>
-              <Card.Subtitle>Token:</Card.Subtitle>
-              <Card.Text>{alloc.token}</Card.Text>
-              <Card.Subtitle>Amount:</Card.Subtitle>
-              <Card.Text>{alloc.amount} Tokens</Card.Text>
-              <Card.Subtitle>Deadline: </Card.Subtitle>
-              <Card.Text>
-                {alloc.creatorDeadline == 0
-                  ? "Not set yet"
-                  : alloc.creatorDeadline}
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      ))}
-    </Row>
-  );
-};
-
-const BeneficiaryWills = () => {
-  const [beneficiaryWills, setBeneficiaryWills] = useState([]);
-  const { contract, userAccount, walletProvider } = useContext(WalletContext);
-
-  useEffect(() => {
-    const fetchBeneficiaryWills = async () => {
-      if (!userAccount || !contract) return;
-
-      try {
-        // Fetch creators who have allocated tokens to the beneficiary
-        let creators = [];
-        let index = 0; // Start index from 0
-        let errorOccurred = false;
-
-        while (!errorOccurred) {
-          try {
-            const creatorAddress = await contract.creatorsForBeneficiary(
-              ethers.getAddress(userAccount),
-              index
-            );
-            creators.push(creatorAddress);
-            index++; // Increment index to fetch next creator
-          } catch (error) {
-            errorOccurred = true; // Stop the loop if an error occurs
-          }
-        }
-        const willsData = [];
-
-        for (const creator of creators) {
-          // For each creator, fetch the tokens they have allocated to this beneficiary
-          const tokens = await contract.getAllocatedTokensByUser(creator);
-
-          for (const token of tokens) {
-            // Check the allocation for the beneficiary
-            const amount = await contract.tokenAllocations(
-              creator,
-              token,
-              userAccount
-            );
-            /*const tokenContract = new ethers.Contract(
-              token,
-              IERC20Abi.abi,
-              await walletProvider.getSigner()
-            );*/
-            //const balance = await tokenContract.symbol();
-            //console.log(balance);
-            const tempDeadline = await contract.creatorDeadlines(creator);
-
-            if (amount > 0) {
-              willsData.push({
-                creator: creator,
-                token: token,
-                amount: ethers.formatEther(amount), // Convert amount from Wei to Ether
-                creatorDeadline: unixToEasternTime(
-                  ethers.formatUnits(tempDeadline, "wei")
-                ),
-              });
-            }
-          }
-        }
-
-        setBeneficiaryWills(willsData);
-      } catch (error) {
-        //console.error("Error fetching beneficiary wills:", error);
-      }
-    };
-
-    fetchBeneficiaryWills();
-  }, [userAccount, contract]);
-
-  return (
-    <Row xs={1} md={3} className="g-4">
-      {beneficiaryWills.map((will, idx) => (
-        <Col key={idx}>
-          <Card>
-            <Card.Header as="h5">Will Details</Card.Header>
-            <Card.Body>
-              <Card.Subtitle>Token Address: </Card.Subtitle>
-              <Card.Text>{will.token} </Card.Text>
-              <Card.Subtitle>Creator Address: </Card.Subtitle>
-              <Card.Text>{will.creator} </Card.Text>
-              <Card.Subtitle>Amount: </Card.Subtitle>
-              <Card.Text>{will.amount} Tokens</Card.Text>
-              <Card.Subtitle>Deadline: </Card.Subtitle>
-              <Card.Text>
-                {will.creatorDeadline == 0
-                  ? "Not set yet"
-                  : will.creatorDeadline}
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      ))}
-    </Row>
+      <Card>
+        <Card.Body>
+          <Card.Title className="text-center mb-3">
+            Allowances For Allocations
+          </Card.Title>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Token Address</th>
+                <th>Allowance (Tokens)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allowances.map((allowance, idx) => (
+                <tr key={idx}>
+                  <td>{allowance.tokenAddress}</td>
+                  <td>{allowance.allowance}</td>
+                </tr>
+              ))}
+              {allowances.length === 0 && (
+                <tr>
+                  <td colSpan="2" className="text-center">
+                    No allowances found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+    </div>
   );
 };
 
@@ -252,7 +239,7 @@ const AppHome = () => {
 
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
   const [trusteeRows, setTrusteeRows] = useState([{ id: 1 }]);
-  const [token, setToken] = useState("");
+  const [refreshCounter, setRefreshCounter] = useState(0);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [tokenContractAddress, setTokenContractAddress] = useState("");
@@ -275,13 +262,17 @@ const AppHome = () => {
   const [showModal, setShowModal] = useState(false); // For controlling the display of the modal
 
   const checkAndProceedWithAllocation = async () => {
+    console.log(`Token: ${tokenContractAddress}`);
     const tokenContract = new ethers.Contract(
-      token,
+      tokenContractAddress,
       IERC20Abi.abi,
       await walletProvider.getSigner()
     );
-    const balance = await tokenContract.balanceOf(userAccount);
+    const balance = await tokenContract.balanceOf(
+      ethers.getAddress(userAccount)
+    );
     const balanceInEther = ethers.formatEther(balance);
+    console.log(balanceInEther);
 
     if (parseFloat(balanceInEther) < parseFloat(amount)) {
       setShowModal(true); // Show modal to ask for user confirmation
@@ -289,19 +280,75 @@ const AppHome = () => {
       proceedWithAllocation(); // Directly proceed if balance is sufficient
     }
   };
+  /*
+  const AllocationListener = () => {
+    const handler = (user, token, recipient, amount, event) => {
+      console.log(
+        `Allocation Set: ${user} allocated ${ethers.formatEther(
+          amount
+        )} of ${token} to ${recipient}`
+      );
+      console.log(event);
+    };
+
+    // Register the event listener
+    contract.on("AllocationSet", handler);
+
+    // Setup a timer to remove the listener after 5 minutes
+    const timer = setTimeout(() => {
+      contract.removeListener("AllocationSet", handler);
+      console.log("Listener has been removed after 5 minutes.");
+    }, 300000); // 300000 ms = 5 minutes
+
+    // Return a function to manually remove the event listener when needed
+    return () => {
+      clearTimeout(timer); // Clear the timer if manually removing the listener
+      contract.removeListener("AllocationSet", handler);
+      console.log("Listener has been removed manually.");
+    };
+  };
+*/
   const proceedWithAllocation = async () => {
+    //let removeListener; // Variable to hold the cleanup function
+
     try {
+      // Register the event listener and get the cleanup function
+      //removeListener = AllocationListener();
+
       const tx = await contract.setAllocation(
-        token,
+        tokenContractAddress,
         recipient,
         ethers.parseEther(amount)
       );
-      await tx.wait();
+      await tx.wait(); // Wait for the transaction to be mined
+
       console.log("Allocation set successfully.");
+      // Optionally remove the listener early if a certain condition is met
+      // if (conditionToStopEarly) {
+      //   removeListener();
+      // }
+      // Increment the refresh counter to trigger a re-render of WillCards
+      setRefreshCounter((prev) => prev + 1);
+      alert("Allocation set successfully.");
     } catch (error) {
       console.error("An error occurred:", error);
+      // Check if the transaction was rejected by the user
+      if (
+        error.code === "ACTION_REJECTED" ||
+        (error.error && error.error.code === 4001)
+      ) {
+        alert("Transaction was cancelled by the user.");
+      } else {
+        // Display generic error message or other specific errors based on `error.data`
+        alert(
+          "Failed to set allocation: " +
+            (error.data ? error.data.message : error.message)
+        );
+      }
     }
+    // Do not place removeListener() here if you want it to stay active for 5 minutes
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     await checkAndProceedWithAllocation();
@@ -318,8 +365,24 @@ const AppHome = () => {
         tokenContractAddress,
         ethers.parseEther(allowanceAmount)
       );
+      setRefreshCounter((prev) => prev + 1);
+      alert("Allowance set successfully.");
     } catch (error) {
-      console.error("An error occurred:", error);
+      console.error("Failed to set allowance:", error);
+
+      // Check if the transaction was rejected by the user
+      if (
+        error.code === "ACTION_REJECTED" ||
+        (error.error && error.error.code === 4001)
+      ) {
+        alert("Transaction was cancelled by the user.");
+      } else {
+        // If the error is something else, display a more generic error message
+        alert(
+          "Failed to set allowance: " +
+            (error.data ? error.data.message : error.message)
+        );
+      }
     }
   };
   /**
@@ -340,20 +403,6 @@ const AppHome = () => {
     await tx.wait();
   }
 
-  const addSuccessorRow = () => {
-    if (successorRows.length < 3) {
-      const newId = successorRows.length + 1;
-      setSuccessorRows([...successorRows, { id: newId }]);
-    }
-  };
-
-  const addTrusteeRow = () => {
-    if (trusteeRows.length < 3) {
-      const newId = trusteeRows.length + 1;
-      setTrusteeRows([...trusteeRows, { id: newId }]);
-    }
-  };
-
   useEffect(() => {
     if (isConnected && contract) {
       console.log("We are connected to wallet");
@@ -366,36 +415,6 @@ const AppHome = () => {
     const tx = await contract.owner();
     console.log(tx);
   }
-
-  // The following code is for the beneficiary portal
-  const [creator, setCreator] = useState("");
-  const [withdrawalToken, setWithdrawalToken] = useState("");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const handleWithdrawSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const tx = await contract.withdrawTokenForBeneficiary(
-        ethers.getAddress(creator),
-        ethers.getAddress(withdrawalToken),
-        ethers.parseEther(withdrawalAmount.toString())
-      );
-
-      await tx.wait();
-    } catch (error) {
-      let tempDeadline = await contract.creatorDeadlines(creator);
-      tempDeadline = ethers.formatUnits(tempDeadline, "wei");
-      tempDeadline = parseInt(tempDeadline);
-
-      if (tempDeadline == 0) {
-        alert("The creator has not set a deadline for the withdrawal yet.");
-      } else if (tempDeadline > Math.floor(Date.now() / 1000)) {
-        alert("You may not withdraw yet.");
-      } else {
-        console.error("An error occurred:", error);
-      }
-    }
-  };
 
   const handleTokenSelect = (key) => {
     const token = tokens.find((t) => t.symbol === key);
@@ -418,21 +437,245 @@ const AppHome = () => {
       const tx = await contract.setCreatorDeadline(timestamp);
       await tx.wait(); // Wait for the transaction to be mined
       console.log("Deadline set successfully.");
+      setRefreshCounter((prev) => prev + 1);
       alert("Deadline has been successfully set.");
     } catch (error) {
       console.error("Failed to set deadline:", error);
-      alert("Error setting deadline: " + error.message);
+      // Check if the transaction was rejected by the user
+      if (
+        error.code === "ACTION_REJECTED" ||
+        (error.error && error.error.code === 4001)
+      ) {
+        alert("Transaction was cancelled by the user.");
+        return;
+      }
+      if (error.data) {
+        try {
+          const cInterface = new ethers.Interface(dwArtifact.abi);
+          // Decode the error using the contract's ABI
+          const decodedError = cInterface.parseError(error.data);
+          if (decodedError.name === "InvalidDeadline") {
+            alert(
+              "Invalid deadline: The deadline must be set to a future date/time."
+            );
+          } else {
+            alert("Error setting deadline: " + decodedError.reason);
+          }
+        } catch (decodingError) {
+          // If the error cannot be decoded, fall back to a generic error message
+          alert("Error setting deadline: " + error.message);
+        }
+      } else {
+        alert("Error setting deadline: " + error.message);
+      }
     }
   }
 
   return (
     <>
-      {/* <img
-        src='https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png'
-        alt='link'
-      ></img> */}
+      <Container className="">
+        <Row className="justify-content-center">
+          <Col md={8}>
+            <h3 className="text-center mb-4">Creator Portal</h3>
+
+            <Card className="mb-4 shadow-sm">
+              <Card.Body>
+                <Card.Title
+                  className="text-center mb-3"
+                  style={{ color: "black" }}
+                >
+                  Authorize Token Control to DecentraWill
+                </Card.Title>
+                <Form onSubmit={handleAllowanceSubmit}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Token Address</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter or select a token address"
+                        value={tokenContractAddress}
+                        onChange={(e) => {
+                          setTokenContractAddress(e.target.value);
+                          setSelectedToken("^");
+                        }}
+                        required
+                      />
+                      <Dropdown onSelect={handleTokenSelect}>
+                        <Dropdown.Toggle variant="outline-secondary">
+                          {selectedToken
+                            ? selectedToken.symbol
+                            : "Select Token"}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          {tokens.map((token) => (
+                            <Dropdown.Item
+                              key={token.symbol}
+                              eventKey={token.symbol}
+                            >
+                              <img
+                                src={token.imageUrl}
+                                alt={token.symbol}
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  marginRight: 10,
+                                }}
+                              />
+                              {token.symbol}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </InputGroup>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Allowance Amount</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Specify the number of tokens"
+                      value={allowanceAmount}
+                      onChange={(e) => setAllowanceAmount(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Button variant="primary" type="submit">
+                    Set Allowance
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+
+            <Card className="mb-4 shadow-sm">
+              <Card.Body>
+                <Card.Title
+                  className="text-center mb-3"
+                  style={{ color: "black" }}
+                >
+                  Allocate Tokens To Beneficiaries
+                </Card.Title>
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Token Address</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter or select a token address"
+                        value={tokenContractAddress}
+                        onChange={(e) =>
+                          setTokenContractAddress(e.target.value)
+                        }
+                        required
+                      />
+                      <Dropdown onSelect={handleTokenSelect}>
+                        <Dropdown.Toggle variant="outline-secondary">
+                          {selectedToken
+                            ? selectedToken.symbol
+                            : "Select Token"}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          {tokens.map((token) => (
+                            <Dropdown.Item
+                              key={token.symbol}
+                              eventKey={token.symbol}
+                            >
+                              <img
+                                src={token.imageUrl}
+                                alt={token.symbol}
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  marginRight: 10,
+                                }}
+                              />
+                              {token.symbol}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </InputGroup>
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Beneficiary Address</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Please specify the address of the will's beneficiary for token withdrawal."
+                      value={recipient}
+                      onChange={(e) => setRecipient(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Amount</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="Please specify the amount of tokens to allocate."
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Button variant="primary" type="submit">
+                    Set Allocation
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+
+            <Card>
+              <Card.Body>
+                <Card.Title
+                  className="text-center mb-3"
+                  style={{ color: "black" }}
+                >
+                  Token Availability Date
+                </Card.Title>
+                <Form onSubmit={setDeadlineHandler}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date and Time</Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      placeholder="Select date and time"
+                      value={deadline}
+                      onChange={(e) => setDeadline(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+                  <Button variant="primary" type="submit">
+                    Set Deadline
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+
+            {showModal && (
+              <CustomAlert
+                show={showModal}
+                onClose={(userConfirmed) => {
+                  setShowModal(false); // Always close the modal
+                  if (userConfirmed) {
+                    proceedWithAllocation(); // Proceed only if user confirms
+                  } else {
+                    console.log("User cancelled the operation.");
+                  }
+                }}
+                title="Confirm Allocation"
+                message="The allocation amount exceeds your balance. Do you want to proceed?"
+              />
+            )}
+
+            <WillCards refreshCounter={refreshCounter} />
+          </Col>
+        </Row>
+      </Container>
+
+      {/*
       <h3>Creator Portal</h3>
-      {/*Here we set the allowance for the DecentraWill contract*/}
+     
       <h4 style={{ color: "#e056fd" }}>
         How much token control to give DecentraWill?
       </h4>
@@ -486,7 +729,7 @@ const AppHome = () => {
         </Button>
       </Form>
       <br />
-      {/*Here we set the allocation for the beneficiary*/}
+      
       <h4 style={{ color: "#e056fd" }}>
         How much tokens should this beneficiary receive?
       </h4>
@@ -524,15 +767,6 @@ const AppHome = () => {
             </Form.Text>
           )}
         </Form.Group>
-        {/* <Form.Group>
-          <Form.Label>Token Address</Form.Label>
-          <Form.Control
-            type='text'
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder='Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet.'
-          />
-        </Form.Group> */}
 
         <Form.Group>
           <Form.Label>Beneficiary Address</Form.Label>
@@ -562,7 +796,7 @@ const AppHome = () => {
       <h4 style={{ color: "#e056fd" }}>
         At what point should beneficiaries be able to withdraw their tokens?
       </h4>
-      {/* The following code is for setting the deadline */}
+      
       <Form onSubmit={setDeadlineHandler}>
         <Form.Group>
           <Form.Label>Date and Time</Form.Label>
@@ -592,155 +826,9 @@ const AppHome = () => {
           message="The allocation amount exceeds your balance. Do you want to proceed?"
         />
       )}
-      {/* ----------------------commented out below ----------------------------*/}
-      {/* seperating creator and beneficiary portal */}
       <br />
-      {/* <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
-      <WillCards /> */}
-      <br />
-      {/* <h3>Beneficiary Portal</h3>
-
-      <Form onSubmit={handleWithdrawSubmit}>
-        <Form.Group>
-          <Form.Label>Creator Address</Form.Label>
-          <Form.Control
-            type="text"
-            value={creator}
-            onChange={(e) => setCreator(e.target.value)}
-            placeholder="Please specify the will creator's wallet address."
-          />
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>Token Address</Form.Label>
-          <Form.Control
-            type="text"
-            value={withdrawalToken}
-            onChange={(e) => setWithdrawalToken(e.target.value)}
-            placeholder="Please specify the token address, e.g. USDC would be 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 on the Ethereum mainnet."
-          />
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>Amount</Form.Label>
-          <Form.Control
-            type="number"
-            value={withdrawalAmount}
-            onChange={(e) => setWithdrawalAmount(e.target.value)}
-            placeholder="Please specify the amount of tokens you'd like to withdraw."
-          />
-        </Form.Group>
-
-        <Button variant="primary" type="submit">
-          Withdraw
-        </Button>
-      </Form> */}
-      <br />
-      {/* <h4 style={{ color: "#e056fd" }}>Tokens allocated to you</h4>
-      <BeneficiaryWills /> */}
-      {/*<Form>
-        <Form.Group className="mb-3 text-center" controlId="testamentName">
-          <Form.Label>Testament Name</Form.Label>
-          <Row className="justify-content-center">
-            <Col xs={5}>
-              <Form.Control type="email" placeholder="Enter Testament name" />
-            </Col>
-          </Row>
-        </Form.Group>
-
-        <Form.Group className="mb-3 text-center" controlId="successor">
-          <Form.Label>Enter Successor</Form.Label>
-          <Row className="justify-content-center">
-            <Form.Text className="text-primary">Min 1, Max 3</Form.Text>
-          </Row>
-          {successorRows.map((row) => (
-            <React.Fragment key={row.id}>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control placeholder="Successor" />
-                </Col>
-              </Row>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control type="email" placeholder="Successor Email" />
-                </Col>
-              </Row>
-            </React.Fragment>
-          ))}
-          {successorRows.length < 3 && (
-            <Row className="justify-content-center">
-              <Button variant="primary" onClick={addSuccessorRow}>
-                Add Successor
-              </Button>
-            </Row>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3 text-center" controlId="trustee">
-          <Form.Label>Enter Trustee</Form.Label>
-          <Row className="justify-content-center">
-            <Form.Text className="text-primary">Min 1, Max 3</Form.Text>
-          </Row>
-          {trusteeRows.map((row) => (
-            <React.Fragment key={row.id}>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control placeholder="Trustee" />
-                </Col>
-              </Row>
-              <Row className="justify-content-center">
-                <Col xs={5}>
-                  <Form.Control type="email" placeholder="Trustee Email" />
-                </Col>
-              </Row>
-            </React.Fragment>
-          ))}
-          {trusteeRows.length < 3 && (
-            <Row className="justify-content-center">
-              <Button variant="primary" onClick={addTrusteeRow}>
-                Add Trustee
-              </Button>
-            </Row>
-          )}
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="testamentName">
-          <Form.Label>Set Up A Quorum</Form.Label>
-          <Row>
-            <Col sm={2}>
-              <InputGroup size="sm" className="mb-3">
-                <InputGroup.Text id="inputGroup-sizing-sm">#</InputGroup.Text>
-                <Form.Control
-                  type="email"
-                  aria-label="Small"
-                  aria-describedby="inputGroup-sizing-sm"
-                />
-              </InputGroup>
-            </Col>
-            <Form.Text className="text-primary">
-              At least one trustee. Max 2.
-            </Form.Text>
-          </Row>
-        </Form.Group>
-
-        <Dropdown>
-          <Dropdown.Toggle variant="success" id="dropdown-basic">
-            Select Tokens from List
-          </Dropdown.Toggle>
-
-          <Dropdown.Menu>
-            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-
-        <Row className="justify-content-center">
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
-        </Row>
-          </Form>*/}
+      <h4 style={{ color: "#e056fd" }}>Existing Wills</h4>
+      <WillCards refreshCounter={refreshCounter} />*/}
     </>
   );
 };
