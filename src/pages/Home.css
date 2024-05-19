@@ -1,0 +1,22 @@
+.home-hero {
+  background: linear-gradient(to right, #141e30, #243b55);
+  color: #ffffff;
+  padding: 100px 0;
+}
+
+.home-stack {
+  background: #f8f9fa;
+}
+
+.home-how-it-works {
+  background: #ffffff;
+  padding: 50px 0;
+}
+
+.card-body {
+  text-align: center;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}

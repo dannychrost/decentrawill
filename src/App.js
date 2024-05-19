@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Home from "./pages/Home";
-import Home2 from "./pages/Home2";
-import AppHome from "./pages/AppHome";
+
+import CreatorHome from "./pages/CreatorHome";
 import BeneficiaryHome from "./pages/BeneficiaryHome";
 
 import Faq from "./pages/Faq";
@@ -43,11 +43,11 @@ function App() {
               >
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/Home2" element={<Home2 />} />
+
                   <Route path="/faq" element={<Faq />} />
                   <Route path="/createAccount" element={<CreateAccount />} />
                   <Route path="/signIn" element={<SignIn />} />
-                  <Route path="/creator" element={<AppHome />} />
+                  <Route path="/creator" element={<CreatorHome />} />
                   <Route path="/beneficiary" element={<BeneficiaryHome />} />
                 </Routes>
               </div>

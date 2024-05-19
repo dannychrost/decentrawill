@@ -240,7 +240,7 @@ const WillCards = ({ refreshCounter }) => {
   );
 };
 
-const AppHome = () => {
+const CreatorHome = () => {
   // The following code is for the creator portal
 
   const [successorRows, setSuccessorRows] = useState([{ id: 1 }]);
@@ -846,4 +846,4 @@ const AppHome = () => {
   );
 };
 
-export default AppHome;
+export default CreatorHome;

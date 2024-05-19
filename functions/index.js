@@ -1,7 +1,8 @@
 /* eslint-disable */ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
-
+// SPF and DKIM needs to be added in the future using a custom domain
+// In the future, this should also be checked every 24 hours rather than calling the endpoint from the frontend
 exports.sendDeadlineNotification = functions.https.onCall(
   async (data, context) => {
     const email = context.auth.token.email;
