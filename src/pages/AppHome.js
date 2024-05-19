@@ -8,6 +8,9 @@ import {
   InputGroup,
   Table,
 } from "react-bootstrap";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth, functions } from "../firebase/Firebase"; // Import your Firebase configuration
 
 import { Dropdown, Container } from "react-bootstrap";
 import { DropdownButton } from "react-bootstrap";
@@ -427,6 +430,7 @@ const AppHome = () => {
     }
   };
   const [deadline, setDeadline] = useState("");
+
   async function setDeadlineHandler(event) {
     event.preventDefault();
 
@@ -442,6 +446,12 @@ const AppHome = () => {
       console.log("Deadline set successfully.");
       setRefreshCounter((prev) => prev + 1);
       alert("Deadline has been successfully set.");
+      // Call the Cloud Function to send an email notification
+      const sendDeadlineNotification = httpsCallable(
+        functions,
+        "sendDeadlineNotification"
+      );
+      await sendDeadlineNotification({ deadlineDate: deadline });
     } catch (error) {
       console.error("Failed to set deadline:", error);
       // Check if the transaction was rejected by the user

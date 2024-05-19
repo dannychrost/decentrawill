@@ -109,7 +109,7 @@ const CreateAccount = () => {
       const auth = getAuth();
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          navigate("/appHome"); // Or wherever you want to navigate after successful registration
+          navigate("/signIn"); // Or wherever you want to navigate after successful registration
         })
         .catch((error) => {
           const errorCode = error.code;

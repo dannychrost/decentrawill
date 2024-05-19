@@ -62,7 +62,7 @@ export default function SignIn() {
 
   return (
     <Container className="d-flex justify-content-center align-items-center vh-80">
-      {userLoggedIn && <Navigate to={"/appHome"} replace={true} />}
+      {userLoggedIn && <Navigate to={"/creator"} replace={true} />}
 
       <Card style={{ width: "24rem" }}>
         <Card.Body>
