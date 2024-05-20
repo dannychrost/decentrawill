@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { doSignOut } from "../firebase/Auth";
 import Nav from "react-bootstrap/Nav";
-
+import { FaGithub, FaEthereum, FaEnvelope } from "react-icons/fa";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { Navbar, Container, Row, Col, Form, Button } from "react-bootstrap";
 import { WalletContext } from "../contexts/WalletContext";
@@ -40,33 +40,38 @@ function MainNavbar() {
                 Beneficiary Portal
               </Nav.Link>
               {userLoggedIn ? (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: "10px",
-                  }}
-                >
-                  <Button
-                    variant="outline-danger"
-                    onClick={() => {
-                      doSignOut().then(() => {
-                        navigate("/");
-                      });
+                <>
+                  <Nav.Link as={Link} to="/profile">
+                    Profile
+                  </Nav.Link>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      gap: "10px",
                     }}
                   >
-                    Logout
-                  </Button>
-                  <Button variant="primary" onClick={handleWalletAction}>
-                    {isConnected
-                      ? `${userAccount.substring(
-                          0,
-                          6
-                        )}...${userAccount.substring(userAccount.length - 4)}`
-                      : "Connect Wallet"}
-                  </Button>
-                </div>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => {
+                        doSignOut().then(() => {
+                          navigate("/");
+                        });
+                      }}
+                    >
+                      Logout
+                    </Button>
+                    <Button variant="primary" onClick={handleWalletAction}>
+                      {isConnected
+                        ? `${userAccount.substring(
+                            0,
+                            6
+                          )}...${userAccount.substring(userAccount.length - 4)}`
+                        : "Connect Wallet"}
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <>
                   <Nav.Link as={Link} to="/createAccount">
@@ -75,6 +80,14 @@ function MainNavbar() {
                   <Nav.Link as={Link} to="/signIn">
                     Sign In
                   </Nav.Link>
+                  <Button variant="primary" onClick={handleWalletAction}>
+                    {isConnected
+                      ? `${userAccount.substring(
+                          0,
+                          6
+                        )}...${userAccount.substring(userAccount.length - 4)}`
+                      : "Connect Wallet"}
+                  </Button>
                 </>
               )}
             </Nav>
@@ -128,90 +141,46 @@ function AppNavbar() {
 function FooterNavbar() {
   return (
     <footer className="bg-dark text-white py-4">
-      {" "}
-      {/* Add some margin top */}
       <Container>
-        <Row className="py-4">
-          {" "}
-          {/* Add some padding */}
-          {/* Subscribe Section */}
-          <Col md={{ span: 4, offset: 0 }}>
-            {" "}
-            {/* Medium devices and up take half width, add margin bottom */}
-            <h5>Sign up for updates</h5>
-            <Form>
-              <Form.Group controlId="formBasicEmail">
-                <Form.Control type="email" placeholder="Enter email" />
-              </Form.Group>
-              <Button variant="primary" type="submit">
-                Subscribe
-              </Button>
-            </Form>
-          </Col>
-          {/* Contact Us Section */}
-          <Col md={{ span: 4, offset: 2 }}>
-            {" "}
-            {/* Medium devices and up take half width, add margin bottom */}
-            <h5>Contact us</h5>
+        <Row className="py-4 text-center">
+          {/* Smart Contract Section */}
+          <Col md={{ span: 4, offset: 0 }} className="mb-3">
+            <h5>Smart Contract</h5>
             <p>
-              123 Main Street
-              <br />
-              City, State ZIP
-              <br />
-              Phone: 123-456-7890
-              <br />
-              Email: info@example.com
+              <a
+                href="https://amoy.polygonscan.com/address/0xbCE4bC934BeAa8D4a30f830e0f4857272A2508C6"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaEthereum size={30} />
+              </a>
             </p>
           </Col>
-          <Col md={{ span: 2, offset: 0 }}>
-            {" "}
-            {/* Medium devices and up take half width, add margin bottom */}
-            <h5>Links</h5>
+
+          {/* GitHub Repository Section */}
+          <Col md={{ span: 4, offset: 0 }} className="mb-3">
+            <h5>GitHub</h5>
             <p>
               <a
-                href="https://www.linkedin.com/"
+                href="https://github.com/dannychrost/decentrawill"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
-                  alt="LinkedIn Logo"
-                  style={{ width: "30px", height: "30px" }}
-                />
+                <FaGithub size={30} />
               </a>
-              <br />
+            </p>
+          </Col>
+
+          {/* Contact Us Section */}
+          <Col md={{ span: 4, offset: 0 }} className="mb-3">
+            <h5>Contact Us</h5>
+            <p>
               <a
-                href="https://www.linkedin.com/"
+                href="mailto:decentrawill@gmail.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <a
-                  href="https://www.instagram.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/768px-Instagram_icon.png"
-                    alt="Instagram Logo"
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      marginRight: "10px",
-                    }}
-                  />
-                </a>
-              </a>
-              <br />
-              <a
-                href="mailto:youremail@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg"
-                  alt="Gmail Logo"
-                  style={{ width: "30px", height: "30px" }}
-                />
+                <FaEnvelope size={30} />
               </a>
             </p>
           </Col>
