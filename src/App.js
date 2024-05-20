@@ -7,6 +7,7 @@ import BeneficiaryHome from "./pages/BeneficiaryHome";
 import Faq from "./pages/Faq";
 import SignIn from "./pages/SignIn";
 import CreateAccount from "./pages/CreateAccount";
+import ProfilePage from "./pages/ProfilePage";
 import { Button } from "react-bootstrap";
 import { MainNavbar, AppNavbar, FooterNavbar } from "./components/Navbar";
 import { NavbarProvider, NavbarContext } from "./contexts/NavbarContext";
@@ -43,7 +44,7 @@ function App() {
               >
                 <Routes>
                   <Route path="/" element={<Home />} />
-
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/faq" element={<Faq />} />
                   <Route path="/createAccount" element={<CreateAccount />} />
                   <Route path="/signIn" element={<SignIn />} />
