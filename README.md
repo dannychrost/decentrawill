@@ -1,5 +1,5 @@
 # Decentrawill
-
+https://decentrawill.web.app/
 ## Overview
 
 Decentrawill revolutionizes the way wills are created, managed, and executed. In the traditional process of setting up a will, individuals often face challenges such as notary fraud, time-consuming procedures, and the risk of will alteration. Decentrawill eliminates these issues by leveraging blockchain technology, offering a transparent, immutable, and secure platform for automating the terms of wills. Our platform enables testators to have full control over their assets with the flexibility to set their desired conditions and deadlines. By reducing the intermediaries involved, Decentrawill not only simplifies the process but also significantly decreases the potential for fraud, making the transfer of assets seamless and trustworthy.
